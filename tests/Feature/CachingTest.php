@@ -92,6 +92,10 @@ test('random color selection works with cached palette', function () {
 });
 
 test('api endpoints use cached data', function () {
+    // Freeze time to avoid timing issues with local_time field
+    $fixedTime = Carbon::parse('2025-07-25 12:00:00');
+    Carbon::setTestNow($fixedTime);
+    
     $suburb = Suburb::create(['hash' => Suburb::generateHash(), 'timezone' => 'UTC']);
     $suburb->assignColorForDate(Carbon::today());
     
@@ -109,6 +113,9 @@ test('api endpoints use cached data', function () {
     
     // Responses should be identical
     expect($response1->json())->toBe($response2->json());
+    
+    // Clean up
+    Carbon::setTestNow();
 });
 
 test('cache handles non-existent suburbs correctly', function () {
