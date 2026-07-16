@@ -1,0 +1,21 @@
+import { SELF, env } from 'cloudflare:test'
+import { describe, it, beforeAll, expect } from 'vitest'
+import { getDb } from '../src/db/client'
+import { seedPalettes } from '../seed/palettes'
+
+beforeAll(async () => {
+  await seedPalettes(getDb(env.DB))
+})
+
+describe('GET /v1/palettes', () => {
+  it('lists the seeded palettes with colors', async () => {
+    const res = await SELF.fetch('https://x/v1/palettes')
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { palettes: Array<{ slug: string; colors: unknown[] }> }
+    const slugs = body.palettes.map((p) => p.slug)
+    expect(slugs).toContain('rainbow')
+    expect(slugs.length).toBe(7)
+    const rainbow = body.palettes.find((p) => p.slug === 'rainbow')!
+    expect(rainbow.colors.length).toBe(7)
+  })
+})

@@ -1,12 +1,14 @@
 import { Hono } from 'hono'
 import type { AppEnv } from './types'
 import { neighborhoodsRoute } from './routes/neighborhoods'
+import { palettesRoute } from './routes/palettes'
 
 const app = new Hono<AppEnv>()
 
 app.get('/', (c) => c.json({ name: 'neighborhue', version: 'v1' }))
 
 app.route('/v1/neighborhoods', neighborhoodsRoute)
+app.route('/v1/palettes', palettesRoute)
 
 app.notFound((c) => c.json({ error: 'not_found', message: 'Not found' }, 404))
 
