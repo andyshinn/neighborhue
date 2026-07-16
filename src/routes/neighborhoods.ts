@@ -180,6 +180,10 @@ neighborhoodsRoute.patch('/:id', requireAdminSecret, zJson(patchSchema), async (
     patch.customColors = body.custom_colors === null ? null : JSON.stringify(body.custom_colors)
   }
 
+  // No fields to update: return the current config unchanged (graceful no-op).
+  if (Object.keys(patch).length === 0) {
+    return c.json(await serializeConfig(db, nb))
+  }
   await updateNeighborhood(db, nb.id, patch)
   const updated = await getNeighborhood(db, nb.id)
   return c.json(await serializeConfig(db, updated!))

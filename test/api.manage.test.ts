@@ -80,9 +80,24 @@ describe('GET/PATCH/DELETE management', () => {
     })
     expect(res.status).toBe(200)
     const cfg = (await res.json()) as Record<string, unknown>
+    expect(cfg).not.toHaveProperty('admin_secret')
     expect(cfg.name).toBe('Renamed')
     expect(cfg.rotation_hour).toBe(9)
     expect(cfg.palette).toBe('vivid')
+  })
+
+  it('patch with an empty body is a graceful no-op (200, config unchanged)', async () => {
+    const nb = await fresh()
+    const res = await SELF.fetch(`https://x/v1/neighborhoods/${nb.id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${nb.admin_secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+    expect(res.status).toBe(200)
+    const cfg = (await res.json()) as Record<string, unknown>
+    expect(cfg).not.toHaveProperty('admin_secret')
+    expect(cfg.name).toBe('Orig')
+    expect(cfg.palette).toBe('rainbow')
   })
 
   it('patch rejects invalid body with 400', async () => {
