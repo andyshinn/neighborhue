@@ -2,6 +2,12 @@ name = "neighborhue-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
+# API custom domain (apex neighborhue.app is reserved for the frontend SPA).
+# Cloudflare provisions the DNS record + SSL cert on deploy.
+[[routes]]
+pattern = "api.neighborhue.app"
+custom_domain = true
+
 [vars]
 CORS_ORIGIN = "https://neighborhue.app"
 MANAGE_URL_BASE = "https://neighborhue.app"
