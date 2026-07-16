@@ -1,4 +1,8 @@
 // seed/build-sql.ts
+// Emits INSERT OR IGNORE statements from PALETTES, so re-running this against an
+// already-seeded database is a no-op for rows that already exist: editing an
+// existing palette's colors here will NOT update previously-seeded rows. Changing
+// already-seeded palette data requires a migration, not a re-seed.
 import { writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

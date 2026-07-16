@@ -133,7 +133,13 @@ export const PALETTES: SeedPalette[] = [
   },
 ]
 
-// Idempotent: safe to run repeatedly. Deterministic ids make re-seeds no-ops.
+// Idempotent: safe to run repeatedly. Deterministic ids make re-seeds no-ops via
+// onConflictDoNothing (INSERT OR IGNORE), so a row that already exists is left as-is.
+// IMPORTANT: this means editing an existing palette's colors/name/description in
+// PALETTES above will NOT update rows already written to a database that has been
+// seeded before — onConflictDoNothing skips the conflicting insert rather than
+// updating it. Changing already-seeded palette data requires a migration (or a
+// manual UPDATE/DELETE), not just a re-run of seed:local / seed:remote.
 export async function seedPalettes(db: DB): Promise<void> {
   for (const p of PALETTES) {
     const paletteId = `pal_${p.slug}`

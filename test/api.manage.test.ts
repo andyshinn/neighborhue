@@ -43,6 +43,24 @@ describe('POST /v1/neighborhoods', () => {
     expect((await create({ timezone: 'Mars/Base' })).status).toBe(400)
     expect((await create({ rotation_hour: 99 })).status).toBe(400)
   })
+
+  it('rejects an empty/malformed JSON body with 400, not 500', async () => {
+    const empty = await SELF.fetch('https://x/v1/neighborhoods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '',
+    })
+    expect(empty.status).toBe(400)
+    expect(((await empty.json()) as Record<string, string>).error).toBe('invalid_request')
+
+    const malformed = await SELF.fetch('https://x/v1/neighborhoods', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{not json',
+    })
+    expect(malformed.status).toBe(400)
+    expect(((await malformed.json()) as Record<string, string>).error).toBe('invalid_request')
+  })
 })
 
 describe('GET/PATCH/DELETE management', () => {
