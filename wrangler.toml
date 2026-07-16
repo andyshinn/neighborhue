@@ -9,5 +9,5 @@ MANAGE_URL_BASE = "https://neighborhue.app"
 [[d1_databases]]
 binding = "DB"
 database_name = "neighborhue"
-database_id = "placeholder-set-in-task-17"
+database_id = "f8d6f3f8-4ec1-40cc-99d6-fb2d30e6f1b6"
 migrations_dir = "migrations"
