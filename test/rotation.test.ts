@@ -34,9 +34,12 @@ describe('rotation', () => {
   })
 
   it('keeps the same wall-clock hour across spring-forward (gap is 23h)', () => {
-    // US spring-forward 2026-03-08. Evaluate just after the 07:00 rotation on the 8th.
-    const now = DateTime.fromISO('2026-03-08T14:00:00.000Z', { zone: 'utc' })
+    // US spring-forward 2026-03-08. Evaluate on 2026-03-07 so the selected color-day
+    // spans the transition: 07:00 CST Mar 7 => 07:00 CDT Mar 8, a 23h real span.
+    const now = DateTime.fromISO('2026-03-07T14:00:00.000Z', { zone: 'utc' })
     const info = rotation(CHI, 7, now)
+    expect(info.rotatedAt).toBe('2026-03-07T13:00:00.000Z')
+    expect(info.nextRotationAt).toBe('2026-03-08T12:00:00.000Z')
     const start = DateTime.fromISO(info.rotatedAt)
     const next = DateTime.fromISO(info.nextRotationAt)
     // Both are 07:00 local; the real gap is 23 hours across spring-forward.
@@ -46,9 +49,12 @@ describe('rotation', () => {
   })
 
   it('keeps the same wall-clock hour across fall-back (gap is 25h)', () => {
-    // US fall-back 2026-11-01. Evaluate just after the 07:00 rotation on the 1st.
-    const now = DateTime.fromISO('2026-11-01T14:00:00.000Z', { zone: 'utc' })
+    // US fall-back 2026-11-01. Evaluate on 2026-10-31 so the selected color-day
+    // spans the transition: 07:00 CDT Oct 31 => 07:00 CST Nov 1, a 25h real span.
+    const now = DateTime.fromISO('2026-10-31T14:00:00.000Z', { zone: 'utc' })
     const info = rotation(CHI, 7, now)
+    expect(info.rotatedAt).toBe('2026-10-31T12:00:00.000Z')
+    expect(info.nextRotationAt).toBe('2026-11-01T13:00:00.000Z')
     const start = DateTime.fromISO(info.rotatedAt)
     const next = DateTime.fromISO(info.nextRotationAt)
     expect(next.diff(start, 'hours').hours).toBeCloseTo(25, 5)
