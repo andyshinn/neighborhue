@@ -2,12 +2,24 @@
 import { Hono } from 'hono'
 import type { AppEnv } from '../types'
 import { getDb } from '../db/client'
-import { getNeighborhood, getPaletteById, getPaletteColors, getDefaultPalette } from '../db/queries'
-import type { NeighborhoodRow } from '../db/queries'
+import {
+  getNeighborhood,
+  getPaletteById,
+  getPaletteColors,
+  getDefaultPalette,
+  insertNeighborhood,
+  updateNeighborhood,
+  deleteNeighborhood,
+  getPaletteBySlug,
+} from '../db/queries'
+import type { NeighborhoodRow, NeighborhoodInsert } from '../db/queries'
 import { rotation } from '../lib/rotation'
 import { pickColorIndex } from '../lib/pick'
 import { buildColor, type Color } from '../lib/color'
 import { resolveColorList, parseCustomColors, type ColorEntry } from '../colors/resolve'
+import { zJson, createSchema, patchSchema } from '../validators'
+import { requireAdminSecret } from '../middleware/auth'
+import { newNeighborhoodId, newAdminSecret } from '../lib/ids'
 
 export const neighborhoodsRoute = new Hono<AppEnv>()
 
@@ -79,4 +91,103 @@ neighborhoodsRoute.get('/:id', async (c) => {
     palette: paletteSlug,
     day_index: dayIndex,
   })
+})
+
+// Serializes a neighborhood's editable configuration. Never includes the admin secret.
+async function serializeConfig(db: ReturnType<typeof getDb>, nb: NeighborhoodRow) {
+  let paletteSlug: string | null = null
+  if (nb.paletteId) {
+    const p = await getPaletteById(db, nb.paletteId)
+    paletteSlug = p?.slug ?? null
+  }
+  return {
+    id: nb.id,
+    name: nb.name,
+    timezone: nb.timezone,
+    rotation_hour: nb.rotationHour,
+    palette: paletteSlug,
+    custom_colors: nb.customColors ? (JSON.parse(nb.customColors) as unknown) : null,
+  }
+}
+
+// Create
+neighborhoodsRoute.post('/', zJson(createSchema), async (c) => {
+  const body = c.req.valid('json')
+  const db = getDb(c.env.DB)
+
+  let paletteId: string | null = null
+  if (body.palette) {
+    const p = await getPaletteBySlug(db, body.palette)
+    if (!p) return c.json({ error: 'palette_not_found', message: `Unknown palette: ${body.palette}` }, 400)
+    paletteId = p.id
+  }
+
+  const id = newNeighborhoodId()
+  const adminSecret = newAdminSecret()
+  const row: NeighborhoodInsert = {
+    id,
+    adminSecret,
+    name: body.name ?? null,
+    timezone: body.timezone ?? 'UTC',
+    rotationHour: body.rotation_hour ?? 7,
+    paletteId,
+    customColors: null,
+    createdAt: Math.floor(Date.now() / 1000),
+  }
+  await insertNeighborhood(db, row)
+
+  return c.json(
+    {
+      id,
+      admin_secret: adminSecret,
+      manage_url: `${c.env.MANAGE_URL_BASE}/manage/${adminSecret}`,
+      name: row.name,
+      timezone: row.timezone,
+      rotation_hour: row.rotationHour,
+      palette: body.palette ?? null,
+      custom_colors: null,
+    },
+    201,
+  )
+})
+
+// Manage (full editable config; never returns the secret)
+neighborhoodsRoute.get('/:id/manage', requireAdminSecret, async (c) => {
+  const db = getDb(c.env.DB)
+  return c.json(await serializeConfig(db, c.get('neighborhood')))
+})
+
+// Update
+neighborhoodsRoute.patch('/:id', requireAdminSecret, zJson(patchSchema), async (c) => {
+  const db = getDb(c.env.DB)
+  const nb = c.get('neighborhood')
+  const body = c.req.valid('json')
+
+  const patch: Partial<NeighborhoodInsert> = {}
+  if (body.name !== undefined) patch.name = body.name
+  if (body.timezone !== undefined) patch.timezone = body.timezone
+  if (body.rotation_hour !== undefined) patch.rotationHour = body.rotation_hour
+  if (body.palette !== undefined) {
+    if (body.palette === null) {
+      patch.paletteId = null
+    } else {
+      const p = await getPaletteBySlug(db, body.palette)
+      if (!p) return c.json({ error: 'palette_not_found', message: `Unknown palette: ${body.palette}` }, 400)
+      patch.paletteId = p.id
+    }
+  }
+  if (body.custom_colors !== undefined) {
+    patch.customColors = body.custom_colors === null ? null : JSON.stringify(body.custom_colors)
+  }
+
+  await updateNeighborhood(db, nb.id, patch)
+  const updated = await getNeighborhood(db, nb.id)
+  return c.json(await serializeConfig(db, updated!))
+})
+
+// Delete
+neighborhoodsRoute.delete('/:id', requireAdminSecret, async (c) => {
+  const db = getDb(c.env.DB)
+  await deleteNeighborhood(db, c.get('neighborhood').id)
+  return c.body(null, 204)
 })
