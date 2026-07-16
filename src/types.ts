@@ -1,6 +1,4 @@
-// TODO(Task 10): re-point this to `import type { NeighborhoodRow } from './db/queries'`
-// once src/db/queries.ts exists, and delete the temporary type alias below.
-// import type { NeighborhoodRow } from './db/queries'
+import type { NeighborhoodRow } from './db/queries'
 
 export type AppEnv = {
   Bindings: {
@@ -12,5 +10,3 @@ export type AppEnv = {
     neighborhood: NeighborhoodRow
   }
 }
-
-export type NeighborhoodRow = Record<string, unknown>
