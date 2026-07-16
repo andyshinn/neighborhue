@@ -120,7 +120,7 @@ All under `/v1`; JSON by default.
 
 - **`GET /v1/neighborhoods/:id`** — public read. Full JSON (shape per base spec §5.1: `id`, `name`, `timezone`, `rotation_hour`, `color{hex,rgb,hsl,name}`, `rotated_at`, `next_rotation_at`, `seconds_until_rotation`, `palette`, `day_index`). Headers `Cache-Control: public, max-age=<seconds_until_rotation>` + `ETag: "<id>-<day_index>"`; honor `If-None-Match` → `304`. `?format=hex` → `text/plain` `#RRGGBB`; `?format=rgb` → `text/plain` `r,g,b`. Unknown id → `404 { "error": "neighborhood_not_found" }`. `palette` field per D5.
 - **`POST /v1/neighborhoods`** — create. Optional body `{ name?, timezone?, rotation_hour?, palette? }`. `201` returns config **plus** `admin_secret` (`nh_sk_…`, ≥32 bytes base64url) and `manage_url` (D4). `id` via `crypto.randomUUID()`.
-- **`GET /v1/neighborhoods/:id/manage`** — full editable config (auth). *(D3)*
+- **`GET /v1/neighborhoods/:id/manage`** — full editable config (auth). Returns the same editable fields as `PATCH` accepts (`name`, `timezone`, `rotation_hour`, `palette`, `custom_colors`) plus `id`; it does **not** re-return `admin_secret` — the secret is shown exactly once, at create. *(D3)*
 - **`PATCH /v1/neighborhoods/:id`** — update (auth). Subset of `name`, `timezone` (IANA-validated), `rotation_hour` (0–23), `palette` (slug or null), `custom_colors` (array of `{hex,name?}` `#RRGGBB`, or null). Returns updated config.
 - **`DELETE /v1/neighborhoods/:id`** — delete (auth) → `204`.
 - **`GET /v1/palettes`** — list active curated palettes (public).
