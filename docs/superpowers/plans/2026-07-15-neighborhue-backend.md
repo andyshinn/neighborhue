@@ -2218,6 +2218,11 @@ neighborhoodsRoute.patch('/:id', requireAdminSecret, zJson(patchSchema), async (
     patch.customColors = body.custom_colors === null ? null : JSON.stringify(body.custom_colors)
   }
 
+  // No fields to update (schema-valid empty body): graceful no-op, return current config.
+  // Without this, Drizzle's `.set({})` throws "No values to set" → 500.
+  if (Object.keys(patch).length === 0) {
+    return c.json(await serializeConfig(db, nb))
+  }
   await updateNeighborhood(db, nb.id, patch)
   const updated = await getNeighborhood(db, nb.id)
   return c.json(await serializeConfig(db, updated!))
