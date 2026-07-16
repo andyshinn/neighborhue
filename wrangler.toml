@@ -5,3 +5,9 @@ compatibility_date = "2025-01-01"
 [vars]
 CORS_ORIGIN = "https://neighborhue.app"
 MANAGE_URL_BASE = "https://neighborhue.app"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "neighborhue"
+database_id = "placeholder-set-in-task-17"
+migrations_dir = "migrations"
