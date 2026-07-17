@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "neighborhue-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+
+  // API custom domain (apex neighborhue.app is reserved for the frontend SPA).
+  // Cloudflare provisions the DNS record + SSL cert on deploy.
+  "routes": [{ "pattern": "api.neighborhue.app", "custom_domain": true }],
+
+  "vars": {
+    "CORS_ORIGIN": "https://neighborhue.app",
+    "MANAGE_URL_BASE": "https://neighborhue.app"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "neighborhue",
+      "database_id": "f8d6f3f8-4ec1-40cc-99d6-fb2d30e6f1b6",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
