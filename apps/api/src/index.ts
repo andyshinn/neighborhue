@@ -24,8 +24,9 @@ app.use('/v1/*', (c, next) => {
   })(c, next)
 })
 
-app.route('/v1/neighborhoods', neighborhoodsRoute)
-app.route('/v1/palettes', palettesRoute)
+const routes = app.route('/v1/neighborhoods', neighborhoodsRoute).route('/v1/palettes', palettesRoute)
+
+export type AppType = typeof routes
 
 app.notFound((c) => c.json({ error: 'not_found', message: 'Not found' }, 404))
 
@@ -41,4 +42,4 @@ app.onError((err, c) => {
   return c.json({ error: 'internal_error', message: 'Something went wrong' }, 500)
 })
 
-export default app
+export default routes

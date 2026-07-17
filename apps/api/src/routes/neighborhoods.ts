@@ -21,8 +21,6 @@ import { requireAdminSecret } from '../middleware/auth'
 import type { AppEnv } from '../types'
 import { createSchema, patchSchema, zJson } from '../validators'
 
-export const neighborhoodsRoute = new Hono<AppEnv>()
-
 // Resolves the ordered color list and derives today's color for a neighborhood.
 async function todaysColor(
   db: ReturnType<typeof getDb>,
@@ -53,44 +51,6 @@ async function todaysColor(
   return { color: buildColor(chosen.hex, chosen.name), dayIndex: info.dayIndex, info, paletteSlug }
 }
 
-neighborhoodsRoute.get('/:id', async (c) => {
-  const id = c.req.param('id')
-  const db = getDb(c.env.DB)
-  const nb = await getNeighborhood(db, id)
-  if (!nb) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
-
-  const { color, dayIndex, info, paletteSlug } = await todaysColor(db, nb)
-  const etag = `"${nb.id}-${dayIndex}"`
-  const cacheControl = `public, max-age=${info.secondsUntilRotation}`
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.body(null, 304, { ETag: etag, 'Cache-Control': cacheControl })
-  }
-
-  const format = c.req.query('format')
-  if (format === 'hex') {
-    return c.text(color.hex, 200, { ETag: etag, 'Cache-Control': cacheControl })
-  }
-  if (format === 'rgb') {
-    return c.text(color.rgb.join(','), 200, { ETag: etag, 'Cache-Control': cacheControl })
-  }
-
-  c.header('ETag', etag)
-  c.header('Cache-Control', cacheControl)
-  return c.json({
-    id: nb.id,
-    name: nb.name,
-    timezone: nb.timezone,
-    rotation_hour: nb.rotationHour,
-    color,
-    rotated_at: info.rotatedAt,
-    next_rotation_at: info.nextRotationAt,
-    seconds_until_rotation: info.secondsUntilRotation,
-    palette: paletteSlug,
-    day_index: dayIndex,
-  })
-})
-
 // Serializes a neighborhood's editable configuration. Never includes the admin secret.
 async function serializeConfig(db: ReturnType<typeof getDb>, nb: NeighborhoodRow) {
   let paletteSlug: string | null = null
@@ -108,90 +68,125 @@ async function serializeConfig(db: ReturnType<typeof getDb>, nb: NeighborhoodRow
   }
 }
 
-// Create
-neighborhoodsRoute.post('/', zJson(createSchema), async (c) => {
-  const body = c.req.valid('json')
-  const db = getDb(c.env.DB)
+export const neighborhoodsRoute = new Hono<AppEnv>()
+  .get('/:id', async (c) => {
+    const id = c.req.param('id')
+    const db = getDb(c.env.DB)
+    const nb = await getNeighborhood(db, id)
+    if (!nb) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
 
-  let paletteId: string | null = null
-  if (body.palette) {
-    const p = await getPaletteBySlug(db, body.palette)
-    if (!p) return c.json({ error: 'palette_not_found', message: `Unknown palette: ${body.palette}` }, 400)
-    paletteId = p.id
-  }
+    const { color, dayIndex, info, paletteSlug } = await todaysColor(db, nb)
+    const etag = `"${nb.id}-${dayIndex}"`
+    const cacheControl = `public, max-age=${info.secondsUntilRotation}`
 
-  const id = newNeighborhoodId()
-  const adminSecret = newAdminSecret()
-  const row: NeighborhoodInsert = {
-    id,
-    adminSecret,
-    name: body.name ?? null,
-    timezone: body.timezone ?? 'UTC',
-    rotationHour: body.rotation_hour ?? 7,
-    paletteId,
-    customColors: null,
-    createdAt: Math.floor(Date.now() / 1000),
-  }
-  await insertNeighborhood(db, row)
+    if (c.req.header('If-None-Match') === etag) {
+      return c.body(null, 304, { ETag: etag, 'Cache-Control': cacheControl })
+    }
 
-  return c.json(
-    {
-      id,
-      admin_secret: adminSecret,
-      manage_url: `${c.env.MANAGE_URL_BASE}/manage/${adminSecret}`,
-      name: row.name,
-      timezone: row.timezone,
-      rotation_hour: row.rotationHour,
-      palette: body.palette ?? null,
-      custom_colors: null,
-    },
-    201,
-  )
-})
+    const format = c.req.query('format')
+    if (format === 'hex') {
+      return c.text(color.hex, 200, { ETag: etag, 'Cache-Control': cacheControl })
+    }
+    if (format === 'rgb') {
+      return c.text(color.rgb.join(','), 200, { ETag: etag, 'Cache-Control': cacheControl })
+    }
 
-// Manage (full editable config; never returns the secret)
-neighborhoodsRoute.get('/:id/manage', requireAdminSecret, async (c) => {
-  const db = getDb(c.env.DB)
-  return c.json(await serializeConfig(db, c.get('neighborhood')))
-})
+    c.header('ETag', etag)
+    c.header('Cache-Control', cacheControl)
+    return c.json({
+      id: nb.id,
+      name: nb.name,
+      timezone: nb.timezone,
+      rotation_hour: nb.rotationHour,
+      color,
+      rotated_at: info.rotatedAt,
+      next_rotation_at: info.nextRotationAt,
+      seconds_until_rotation: info.secondsUntilRotation,
+      palette: paletteSlug,
+      day_index: dayIndex,
+    })
+  })
+  // Create
+  .post('/', zJson(createSchema), async (c) => {
+    const body = c.req.valid('json')
+    const db = getDb(c.env.DB)
 
-// Update
-neighborhoodsRoute.patch('/:id', requireAdminSecret, zJson(patchSchema), async (c) => {
-  const db = getDb(c.env.DB)
-  const nb = c.get('neighborhood')
-  const body = c.req.valid('json')
-
-  const patch: Partial<NeighborhoodInsert> = {}
-  if (body.name !== undefined) patch.name = body.name
-  if (body.timezone !== undefined) patch.timezone = body.timezone
-  if (body.rotation_hour !== undefined) patch.rotationHour = body.rotation_hour
-  if (body.palette !== undefined) {
-    if (body.palette === null) {
-      patch.paletteId = null
-    } else {
+    let paletteId: string | null = null
+    if (body.palette) {
       const p = await getPaletteBySlug(db, body.palette)
       if (!p) return c.json({ error: 'palette_not_found', message: `Unknown palette: ${body.palette}` }, 400)
-      patch.paletteId = p.id
+      paletteId = p.id
     }
-  }
-  if (body.custom_colors !== undefined) {
-    patch.customColors = body.custom_colors === null ? null : JSON.stringify(body.custom_colors)
-  }
 
-  // No fields to update: return the current config unchanged (graceful no-op).
-  if (Object.keys(patch).length === 0) {
-    return c.json(await serializeConfig(db, nb))
-  }
-  await updateNeighborhood(db, nb.id, patch)
-  const updated = await getNeighborhood(db, nb.id)
-  // Absent only if the row was deleted concurrently with this PATCH.
-  if (!updated) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
-  return c.json(await serializeConfig(db, updated))
-})
+    const id = newNeighborhoodId()
+    const adminSecret = newAdminSecret()
+    const row: NeighborhoodInsert = {
+      id,
+      adminSecret,
+      name: body.name ?? null,
+      timezone: body.timezone ?? 'UTC',
+      rotationHour: body.rotation_hour ?? 7,
+      paletteId,
+      customColors: null,
+      createdAt: Math.floor(Date.now() / 1000),
+    }
+    await insertNeighborhood(db, row)
 
-// Delete
-neighborhoodsRoute.delete('/:id', requireAdminSecret, async (c) => {
-  const db = getDb(c.env.DB)
-  await deleteNeighborhood(db, c.get('neighborhood').id)
-  return c.body(null, 204)
-})
+    return c.json(
+      {
+        id,
+        admin_secret: adminSecret,
+        manage_url: `${c.env.MANAGE_URL_BASE}/manage/${adminSecret}`,
+        name: row.name,
+        timezone: row.timezone,
+        rotation_hour: row.rotationHour,
+        palette: body.palette ?? null,
+        custom_colors: null,
+      },
+      201,
+    )
+  })
+  // Manage (full editable config; never returns the secret)
+  .get('/:id/manage', requireAdminSecret, async (c) => {
+    const db = getDb(c.env.DB)
+    return c.json(await serializeConfig(db, c.get('neighborhood')))
+  })
+  // Update
+  .patch('/:id', requireAdminSecret, zJson(patchSchema), async (c) => {
+    const db = getDb(c.env.DB)
+    const nb = c.get('neighborhood')
+    const body = c.req.valid('json')
+
+    const patch: Partial<NeighborhoodInsert> = {}
+    if (body.name !== undefined) patch.name = body.name
+    if (body.timezone !== undefined) patch.timezone = body.timezone
+    if (body.rotation_hour !== undefined) patch.rotationHour = body.rotation_hour
+    if (body.palette !== undefined) {
+      if (body.palette === null) {
+        patch.paletteId = null
+      } else {
+        const p = await getPaletteBySlug(db, body.palette)
+        if (!p) return c.json({ error: 'palette_not_found', message: `Unknown palette: ${body.palette}` }, 400)
+        patch.paletteId = p.id
+      }
+    }
+    if (body.custom_colors !== undefined) {
+      patch.customColors = body.custom_colors === null ? null : JSON.stringify(body.custom_colors)
+    }
+
+    // No fields to update: return the current config unchanged (graceful no-op).
+    if (Object.keys(patch).length === 0) {
+      return c.json(await serializeConfig(db, nb))
+    }
+    await updateNeighborhood(db, nb.id, patch)
+    const updated = await getNeighborhood(db, nb.id)
+    // Absent only if the row was deleted concurrently with this PATCH.
+    if (!updated) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
+    return c.json(await serializeConfig(db, updated))
+  })
+  // Delete
+  .delete('/:id', requireAdminSecret, async (c) => {
+    const db = getDb(c.env.DB)
+    await deleteNeighborhood(db, c.get('neighborhood').id)
+    return c.body(null, 204)
+  })
