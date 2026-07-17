@@ -159,7 +159,11 @@ export type AppType = typeof routes
 export default routes
 ```
 
-**Scope, stated honestly:** this touches all 5 routes in `neighborhoods.ts` (~170 lines re-indented), the 1 route in `palettes.ts`, and `index.ts`. No control flow, handler bodies, or middleware order changes — it is re-indentation plus operator placement. The existing suite must stay green with **zero test edits**; any test change is a signal the refactor altered behavior and must be investigated, not accommodated.
+**Scope, stated honestly:** this touches all 5 routes in `neighborhoods.ts` (~170 lines re-indented), the 1 route in `palettes.ts`, and `index.ts`. No control flow, handler bodies, or middleware order changes. The existing suite must stay green with **zero test edits**; any test change is a signal the refactor altered behavior and must be investigated, not accommodated.
+
+**One structural wrinkle, not pure re-indentation:** `neighborhoods.ts` declares two helpers — `todaysColor` (between the `/:id` and `POST /` routes) and `serializeConfig` (between `POST /` and `/:id/manage`). A chain is a single expression, so both must move *above* it. They are `function` declarations and therefore hoisted, so this is behavior-preserving, but it is a real edit rather than whitespace.
+
+**Known wart, accepted:** `GET /:id` returns `c.json`, `c.text` (for `?format=hex|rgb`), and `c.body(null, 304)`, so its inferred client type is a union across formats and status codes and will be awkward to consume. This does not block the refactor — the success criterion is that `AppType` exports and the suite stays green, not that every route has an ergonomic client type. Address the ergonomics when the frontend actually consumes that route.
 
 Per M13 this lands as its own commit, after the move.
 
@@ -214,7 +218,9 @@ If the other session's frontend spec assumes a **separate repo** (as [`docs/fron
 2. `pnpm -r typecheck` and `pnpm -r test` pass — **the existing API suite green and unmodified**.
 3. `pnpm check` (Biome) passes from the root across both apps, and still ignores `migrations/` and `seed.sql`.
 4. `wrangler deploy --dry-run -c apps/api/wrangler.jsonc` succeeds, confirming the TOML→JSONC conversion preserved the D1 binding, custom domain route, and vars.
-5. **The seam test — the only proof the monorepo earns its keep:** rename a response field in `apps/api/src/validators.ts` and confirm `pnpm -F @neighborhue/web typecheck` **fails**. Revert. If this *passes*, the RPC wiring is broken regardless of what else is green.
+5. **The seam test — the only proof the monorepo earns its keep:** rename the `palettes` response key to `paletteList` in `apps/api/src/routes/palettes.ts` and confirm `pnpm -F @neighborhue/web typecheck` **fails**. Revert. If this *passes*, the RPC wiring is broken regardless of what else is green.
+
+   > Targets `routes/palettes.ts`, **not** `validators.ts` — the latter holds *request* schemas, so renaming there would not perturb a response type. `/v1/palettes` is also the only route with a single clean `c.json` response; `/v1/neighborhoods/:id` mixes `c.json`, `c.text` (for `?format=hex|rgb`), and `c.body(null, 304)`, so its inferred client type is an awkward union — see §5.
 
 No API behavior changes in this work. A green existing suite is therefore meaningful signal, not a formality — and per §5 any test edit is a red flag to investigate, not accommodate.
 
