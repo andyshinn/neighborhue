@@ -19,7 +19,7 @@
 - **No `import.meta.env` in `apps/web`.** It is a Vite construct needing `vite/client` types, which are deliberately absent — it would fail the web typecheck.
 - **`wrangler` and `typescript` are per-app devDependencies**, not hoisted to the root (spec M15).
 - Package names: root `neighborhue` (private), `@neighborhue/api`, `@neighborhue/web`.
-- Do not touch `.gitignore` — it has uncommitted user edits.
+- **`.gitignore` gets exactly one line changed** (Task 1 Step 9b): `seed/seed.sql` → `**/seed.sql`. That rule contains a slash, so git anchors it to the repo root; after the move `apps/api/seed/seed.sql` would no longer match and the generated 10KB SQL file would start getting committed. **Change only that line.** The file has an uncommitted user edit (`docs/handoff/`) that must be preserved untouched, and nothing else in it needs changing (`node_modules/`, `dist/`, `.wrangler/`, `.dev.vars`, `*.log` have no internal slash and already match at any depth — verified).
 - The API is live but unannounced (testing only), so no migration or compatibility story is needed.
 
 ---
@@ -62,11 +62,11 @@
 - Consumes: nothing (first task)
 - Produces: workspace packages `@neighborhue/api` (at `apps/api`) and root `neighborhue`. Root scripts `pnpm test`, `pnpm typecheck`, `pnpm check`. `tsconfig.base.json` for later apps to extend.
 
-- [ ] **Step 1: Record the green baseline**
+- [ ] **Step 1: Confirm the green baseline**
 
 Run: `pnpm test 2>&1 | tail -5`
 
-Write down the exact passing test count. Every later task must match it. Expected: all tests pass (roughly 73 — record the real number, do not trust this one).
+Expected: **73 passed (73), 16 test files** — measured on this exact commit before the plan was written. Every later task must match this number exactly. If it differs, stop and report: something changed underneath the plan.
 
 - [ ] **Step 2: Move the tree with `git mv`**
 
@@ -234,6 +234,22 @@ The `exports` block is what lets `apps/web` import `AppType` in Task 4. Every sc
   },
 ```
 
+- [ ] **Step 9b: Fix the anchored `.gitignore` rule**
+
+`seed/seed.sql` is anchored to the repo root because it contains a slash. Post-move, `apps/api/seed/seed.sql` would stop matching and the generated file would be committed. Change **only** this line:
+
+```diff
+-seed/seed.sql
++**/seed.sql
+```
+
+Leave every other line alone — especially the trailing `docs/handoff/`, which is an uncommitted user edit.
+
+Verify:
+
+Run: `git check-ignore -v apps/api/seed/seed.sql`
+Expected: prints a match on `**/seed.sql`. If it prints nothing, the generated file is exposed — do not commit until this passes.
+
 - [ ] **Step 10: Install and verify the workspace resolves**
 
 Run: `pnpm install`
@@ -258,10 +274,12 @@ Expected: only `R` (rename) entries — **no `M`**. A modified test file means t
 Run: `pnpm check 2>&1 | tail -20`
 Expected: passes. It must not report diagnostics for `apps/api/migrations/**` or `apps/api/seed/seed.sql`. If it does, Step 9's globs are wrong.
 
-- [ ] **Step 13: Confirm `.gitignore` still covers the new depth**
+- [ ] **Step 13: Confirm no generated or vendored files leak at the new depth**
 
-Run: `git status --short | grep -E "node_modules|\.wrangler" || echo "correctly ignored"`
-Expected: `correctly ignored`. Patterns like `node_modules/` match at any depth, but `wrangler dev` will now create `apps/api/.wrangler` — confirm it is not newly tracked. If it is, report it rather than editing `.gitignore` (it has uncommitted user edits).
+Run: `git status --porcelain | grep -E "node_modules|\.wrangler|seed\.sql" || echo "all correctly ignored"`
+Expected: `all correctly ignored`.
+
+The generated `apps/api/seed/seed.sql` is the one that actually broke (fixed in Step 9b) — if it appears here, Step 9b did not take. `node_modules/` and `.wrangler/` have no internal slash so they already match at any depth, but confirm anyway.
 
 - [ ] **Step 14: Update `README.md`**
 
@@ -269,18 +287,28 @@ Every documented root command now lives under `apps/api`. Update them to either 
 
 - [ ] **Step 15: Commit**
 
+Before committing, confirm the working tree holds nothing unexpected:
+
+Run: `git status --short`
+Expected: only renames (`R`), the config files you edited (`M`), and `apps/api/package.json` / `apps/api/tsconfig.json` as new (`A`/`??`). **No `apps/api/seed/seed.sql`.**
+
 ```bash
-git add -A ':!.gitignore'
+git add -A
 git commit -m "refactor: move the API into apps/api as a pnpm workspace
 
 Pure structural move. Every test imports via relative paths and the tree
-moves together, so no imports changed and the suite is unmodified.
+moves together, so no imports changed and the suite is unmodified: 73/73.
 
 Splits package.json and tsconfig into root + per-app so apps/web can have
-DOM types without inheriting @cloudflare/workers-types. Fixes the Biome
-ignore globs, which were relative to the config file and would have
-silently started linting generated SQL at the new depth."
+DOM types without inheriting @cloudflare/workers-types.
+
+Two ignore rules were anchored to the repo root and would have silently
+stopped matching at the new depth — biome.json's would have started
+linting generated SQL, and .gitignore's would have started committing it.
+Both are now depth-independent."
 ```
+
+> The `.gitignore` hunk also carries a pre-existing uncommitted `docs/handoff/` line from the user. It is adjacent to the changed line in the same hunk, it is benign, and the user approved editing this file — commit it along with the fix rather than trying to split the hunk. Mention it in the task report.
 
 ---
 
