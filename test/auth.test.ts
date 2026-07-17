@@ -1,10 +1,10 @@
 import { env } from 'cloudflare:test'
-import { describe, it, beforeAll, expect } from 'vitest'
 import { Hono } from 'hono'
-import type { AppEnv } from '../src/types'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { getDb } from '../src/db/client'
 import { insertNeighborhood } from '../src/db/queries'
-import { requireAdminSecret, constantTimeEqual } from '../src/middleware/auth'
+import { constantTimeEqual, requireAdminSecret } from '../src/middleware/auth'
+import type { AppEnv } from '../src/types'
 
 const ID = 'auth-nb'
 const SECRET = 'nh_sk_correct_secret_value'

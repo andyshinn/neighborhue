@@ -1,5 +1,5 @@
 import { SELF } from 'cloudflare:test'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('CORS', () => {
   it('allows any origin on public reads', async () => {

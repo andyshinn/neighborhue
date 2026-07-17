@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:test'
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { getDb } from '../src/db/client'
 import { palettes } from '../src/db/schema'
 

@@ -8,26 +8,28 @@ rotates once a day at a locally chosen hour. Colors are computed from
 ## Develop
 
 ```bash
-npm install
-npm test          # vitest (Workers pool)
-npm run dev       # wrangler dev
+pnpm install
+pnpm test          # vitest (Workers pool)
+pnpm dev           # wrangler dev
+pnpm format        # biome format --write
+pnpm check         # biome lint + format (read-only)
 ```
 
 ## Provision (one-time)
 
 ```bash
-npx wrangler d1 create neighborhue      # copy database_id into wrangler.toml
-npm run db:generate                     # generate migrations from schema
-npm run db:migrate:local                # apply locally
-npm run seed:local                      # seed the 7 palettes locally
+pnpm exec wrangler d1 create neighborhue   # copy database_id into wrangler.toml
+pnpm db:generate                           # generate migrations from schema
+pnpm db:migrate:local                      # apply locally
+pnpm seed:local                            # seed the 7 palettes locally
 ```
 
 ## Deploy
 
 ```bash
-npm run db:migrate:remote
-npm run seed:remote
-npm run deploy
+pnpm db:migrate:remote
+pnpm seed:remote
+pnpm deploy
 ```
 
 ## Endpoints (`/v1`)

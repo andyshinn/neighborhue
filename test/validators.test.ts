@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createSchema, patchSchema } from '../src/validators'
 
 describe('createSchema', () => {
   it('accepts a valid body', () => {
-    expect(createSchema.safeParse({ name: 'A', timezone: 'America/Chicago', rotation_hour: 7, palette: 'rainbow' }).success).toBe(true)
+    expect(
+      createSchema.safeParse({ name: 'A', timezone: 'America/Chicago', rotation_hour: 7, palette: 'rainbow' }).success,
+    ).toBe(true)
   })
   it('accepts an empty body (all optional)', () => {
     expect(createSchema.safeParse({}).success).toBe(true)

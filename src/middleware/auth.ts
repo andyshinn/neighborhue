@@ -1,8 +1,8 @@
 // src/middleware/auth.ts
 import { createMiddleware } from 'hono/factory'
-import type { AppEnv } from '../types'
 import { getDb } from '../db/client'
 import { getNeighborhood } from '../db/queries'
+import type { AppEnv } from '../types'
 
 // Constant-time string comparison. Admin secrets are fixed-length, so the
 // length check does not leak useful timing information.
@@ -24,7 +24,7 @@ export const requireAdminSecret = createMiddleware<AppEnv>(async (c, next) => {
   }
 
   const db = getDb(c.env.DB)
-  const nb = await getNeighborhood(db, c.req.param('id')!)
+  const nb = await getNeighborhood(db, c.req.param('id') ?? '')
   if (!nb) {
     return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
   }

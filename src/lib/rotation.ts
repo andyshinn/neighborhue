@@ -9,11 +9,7 @@ export interface RotationInfo {
   secondsUntilRotation: number
 }
 
-export function rotation(
-  timezone: string,
-  rotationHour: number,
-  now: DateTime = DateTime.utc(),
-): RotationInfo {
+export function rotation(timezone: string, rotationHour: number, now: DateTime = DateTime.utc()): RotationInfo {
   const local = now.setZone(timezone)
 
   // The color-day starts at rotationHour local time.
@@ -25,10 +21,16 @@ export function rotation(
   const epoch = DateTime.fromObject(EPOCH, { zone: timezone })
   const dayIndex = Math.floor(currentStart.startOf('day').diff(epoch.startOf('day'), 'days').days + 0.5)
 
+  // toISO() is null only for an invalid DateTime, which here means an unrecognized
+  // timezone. Callers past the API validators can't hit this; fail loudly if they do.
+  const rotatedAt = currentStart.toUTC().toISO()
+  const nextRotationAt = nextStart.toUTC().toISO()
+  if (!rotatedAt || !nextRotationAt) throw new Error(`invalid timezone: ${timezone}`)
+
   return {
     dayIndex,
-    rotatedAt: currentStart.toUTC().toISO()!,
-    nextRotationAt: nextStart.toUTC().toISO()!,
+    rotatedAt,
+    nextRotationAt,
     secondsUntilRotation: Math.max(0, Math.round(nextStart.diff(now, 'seconds').seconds)),
   }
 }

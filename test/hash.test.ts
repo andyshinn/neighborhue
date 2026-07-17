@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { strHash, mulberry32 } from '../src/lib/hash'
+import { describe, expect, it } from 'vitest'
+import { mulberry32, strHash } from '../src/lib/hash'
 
 describe('strHash', () => {
   it('is deterministic', () => {

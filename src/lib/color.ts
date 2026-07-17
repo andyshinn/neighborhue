@@ -6,11 +6,7 @@ export function isValidHex(hex: string): boolean {
 
 export function hexToRgb(hex: string): [number, number, number] {
   if (!isValidHex(hex)) throw new Error(`invalid hex: ${hex}`)
-  return [
-    parseInt(hex.slice(1, 3), 16),
-    parseInt(hex.slice(3, 5), 16),
-    parseInt(hex.slice(5, 7), 16),
-  ]
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]
 }
 
 export function rgbToHsl(r: number, g: number, b: number): [number, number, number] {

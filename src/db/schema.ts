@@ -1,5 +1,5 @@
 // src/db/schema.ts
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const neighborhoods = sqliteTable('neighborhoods', {
   id: text('id').primaryKey(), // public UUID v4 — goes in the share URL
@@ -23,7 +23,9 @@ export const palettes = sqliteTable('palettes', {
 
 export const paletteColors = sqliteTable('palette_colors', {
   id: text('id').primaryKey(),
-  paletteId: text('palette_id').notNull().references(() => palettes.id, { onDelete: 'cascade' }),
+  paletteId: text('palette_id')
+    .notNull()
+    .references(() => palettes.id, { onDelete: 'cascade' }),
   hex: text('hex').notNull(),
   name: text('name'),
   position: integer('position').notNull().default(0), // stable ordering

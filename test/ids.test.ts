@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { newNeighborhoodId, newAdminSecret } from '../src/lib/ids'
+import { describe, expect, it } from 'vitest'
+import { newAdminSecret, newNeighborhoodId } from '../src/lib/ids'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 

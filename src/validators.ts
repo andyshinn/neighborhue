@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import { IANAZone } from 'luxon'
 import { zValidator } from '@hono/zod-validator'
+import { IANAZone } from 'luxon'
+import { z } from 'zod'
 import { HEX_RE } from './lib/color'
 
 const timezone = z.string().refine((tz) => IANAZone.isValidZone(tz), { message: 'invalid timezone' })
@@ -27,9 +27,6 @@ export const patchSchema = z.strictObject({
 export const zJson = <T extends z.ZodTypeAny>(schema: T) =>
   zValidator('json', schema, (result, c) => {
     if (!result.success) {
-      return c.json(
-        { error: 'invalid_request', message: result.error.issues.map((i) => i.message).join('; ') },
-        400,
-      )
+      return c.json({ error: 'invalid_request', message: result.error.issues.map((i) => i.message).join('; ') }, 400)
     }
   })

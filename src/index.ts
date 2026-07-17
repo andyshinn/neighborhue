@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
-import type { AppEnv } from './types'
 import { neighborhoodsRoute } from './routes/neighborhoods'
 import { palettesRoute } from './routes/palettes'
+import type { AppEnv } from './types'
 
 const app = new Hono<AppEnv>()
 

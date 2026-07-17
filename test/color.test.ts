@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { isValidHex, hexToRgb, rgbToHsl, buildColor } from '../src/lib/color'
+import { describe, expect, it } from 'vitest'
+import { buildColor, hexToRgb, isValidHex, rgbToHsl } from '../src/lib/color'
 
 describe('isValidHex', () => {
   it('accepts #RRGGBB', () => {

@@ -1,6 +1,6 @@
 // seed/palettes.ts
 import type { DB } from '../src/db/client'
-import { palettes, paletteColors } from '../src/db/schema'
+import { paletteColors, palettes } from '../src/db/schema'
 
 export interface SeedColor {
   hex: string

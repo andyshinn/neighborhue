@@ -19,8 +19,9 @@
 // `test/env.d.ts`. `setupFiles` stays a normal Vitest `test` option — Vitest
 // runs setup files inside each test file's runner context, which for this
 // pool is the Miniflare worker isolate, so `cloudflare:test` resolves there.
-import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-workers'
+
 import path from 'node:path'
+import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-workers'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({

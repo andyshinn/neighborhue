@@ -1,7 +1,7 @@
-import { SELF, env } from 'cloudflare:test'
-import { describe, it, beforeAll, expect } from 'vitest'
-import { getDb } from '../src/db/client'
+import { env, SELF } from 'cloudflare:test'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { seedPalettes } from '../seed/palettes'
+import { getDb } from '../src/db/client'
 
 beforeAll(async () => {
   await seedPalettes(getDb(env.DB))
@@ -15,7 +15,7 @@ describe('GET /v1/palettes', () => {
     const slugs = body.palettes.map((p) => p.slug)
     expect(slugs).toContain('rainbow')
     expect(slugs.length).toBe(7)
-    const rainbow = body.palettes.find((p) => p.slug === 'rainbow')!
-    expect(rainbow.colors.length).toBe(7)
+    const rainbow = body.palettes.find((p) => p.slug === 'rainbow')
+    expect(rainbow?.colors.length).toBe(7)
   })
 })

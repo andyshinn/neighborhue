@@ -1,9 +1,9 @@
 import { env } from 'cloudflare:test'
-import { describe, it, expect } from 'vitest'
-import { getDb } from '../src/db/client'
-import { palettes, paletteColors } from '../src/db/schema'
 import { eq } from 'drizzle-orm'
-import { seedPalettes, PALETTES } from '../seed/palettes'
+import { describe, expect, it } from 'vitest'
+import { PALETTES, seedPalettes } from '../seed/palettes'
+import { getDb } from '../src/db/client'
+import { paletteColors, palettes } from '../src/db/schema'
 
 describe('seedPalettes', () => {
   it('seeds all seven palettes with rainbow as default', async () => {
@@ -19,7 +19,11 @@ describe('seedPalettes', () => {
     const db = getDb(env.DB)
     await seedPalettes(db)
     for (const p of PALETTES) {
-      const colors = await db.select().from(paletteColors).where(eq(paletteColors.paletteId, `pal_${p.slug}`)).all()
+      const colors = await db
+        .select()
+        .from(paletteColors)
+        .where(eq(paletteColors.paletteId, `pal_${p.slug}`))
+        .all()
       expect(colors.length).toBe(p.colors.length)
     }
   })

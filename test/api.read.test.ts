@@ -1,8 +1,8 @@
-import { SELF, env } from 'cloudflare:test'
-import { describe, it, beforeAll, expect } from 'vitest'
+import { env, SELF } from 'cloudflare:test'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { seedPalettes } from '../seed/palettes'
 import { getDb } from '../src/db/client'
 import { insertNeighborhood } from '../src/db/queries'
-import { seedPalettes } from '../seed/palettes'
 
 const ID = '51fbbdef-62a7-4d19-b1b2-c91e1d721d20'
 
@@ -57,7 +57,8 @@ describe('GET /v1/neighborhoods/:id', () => {
 
   it('honors If-None-Match with a 304', async () => {
     const first = await SELF.fetch(`https://x/v1/neighborhoods/${ID}`)
-    const etag = first.headers.get('ETag')!
+    const etag = first.headers.get('ETag')
+    if (!etag) throw new Error('expected an ETag header on the first response')
     const second = await SELF.fetch(`https://x/v1/neighborhoods/${ID}`, { headers: { 'If-None-Match': etag } })
     expect(second.status).toBe(304)
   })

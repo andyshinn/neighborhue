@@ -4,7 +4,7 @@
 // existing palette's colors here will NOT update previously-seeded rows. Changing
 // already-seeded palette data requires a migration, not a re-seed.
 import { writeFileSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PALETTES } from './palettes'
 
@@ -26,5 +26,5 @@ for (const p of PALETTES) {
 }
 
 const outPath = join(dirname(fileURLToPath(import.meta.url)), 'seed.sql')
-writeFileSync(outPath, lines.join('\n') + '\n')
+writeFileSync(outPath, `${lines.join('\n')}\n`)
 console.log(`Wrote ${outPath} (${PALETTES.length} palettes)`)

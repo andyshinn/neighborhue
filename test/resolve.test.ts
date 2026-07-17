@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { resolveColorList, parseCustomColors } from '../src/colors/resolve'
+import { describe, expect, it } from 'vitest'
+import { parseCustomColors, resolveColorList } from '../src/colors/resolve'
 
 describe('resolveColorList', () => {
   const palette = [{ hex: '#111111', name: 'p' }]

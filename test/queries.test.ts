@@ -1,16 +1,16 @@
 import { env } from 'cloudflare:test'
-import { describe, it, expect } from 'vitest'
-import { getDb } from '../src/db/client'
+import { describe, expect, it } from 'vitest'
 import { seedPalettes } from '../seed/palettes'
+import { getDb } from '../src/db/client'
 import {
-  insertNeighborhood,
-  getNeighborhood,
-  updateNeighborhood,
   deleteNeighborhood,
-  getPaletteBySlug,
   getDefaultPalette,
+  getNeighborhood,
+  getPaletteBySlug,
   getPaletteColors,
+  insertNeighborhood,
   listActivePalettes,
+  updateNeighborhood,
 } from '../src/db/queries'
 
 describe('neighborhood queries', () => {

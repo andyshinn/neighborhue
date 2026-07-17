@@ -1,8 +1,8 @@
 // src/routes/palettes.ts
 import { Hono } from 'hono'
-import type { AppEnv } from '../types'
 import { getDb } from '../db/client'
-import { listActivePalettes, getPaletteColors } from '../db/queries'
+import { getPaletteColors, listActivePalettes } from '../db/queries'
+import type { AppEnv } from '../types'
 
 export const palettesRoute = new Hono<AppEnv>()
 

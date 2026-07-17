@@ -1,7 +1,7 @@
 // src/db/queries.ts
 import { asc, eq } from 'drizzle-orm'
 import type { DB } from './client'
-import { neighborhoods, palettes, paletteColors } from './schema'
+import { neighborhoods, paletteColors, palettes } from './schema'
 
 export type NeighborhoodRow = typeof neighborhoods.$inferSelect
 export type NeighborhoodInsert = typeof neighborhoods.$inferInsert

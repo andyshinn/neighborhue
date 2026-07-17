@@ -1,25 +1,25 @@
 // src/routes/neighborhoods.ts
 import { Hono } from 'hono'
-import type { AppEnv } from '../types'
+import { type ColorEntry, parseCustomColors, resolveColorList } from '../colors/resolve'
 import { getDb } from '../db/client'
+import type { NeighborhoodInsert, NeighborhoodRow } from '../db/queries'
 import {
+  deleteNeighborhood,
+  getDefaultPalette,
   getNeighborhood,
   getPaletteById,
+  getPaletteBySlug,
   getPaletteColors,
-  getDefaultPalette,
   insertNeighborhood,
   updateNeighborhood,
-  deleteNeighborhood,
-  getPaletteBySlug,
 } from '../db/queries'
-import type { NeighborhoodRow, NeighborhoodInsert } from '../db/queries'
-import { rotation } from '../lib/rotation'
-import { pickColorIndex } from '../lib/pick'
 import { buildColor, type Color } from '../lib/color'
-import { resolveColorList, parseCustomColors, type ColorEntry } from '../colors/resolve'
-import { zJson, createSchema, patchSchema } from '../validators'
+import { newAdminSecret, newNeighborhoodId } from '../lib/ids'
+import { pickColorIndex } from '../lib/pick'
+import { rotation } from '../lib/rotation'
 import { requireAdminSecret } from '../middleware/auth'
-import { newNeighborhoodId, newAdminSecret } from '../lib/ids'
+import type { AppEnv } from '../types'
+import { createSchema, patchSchema, zJson } from '../validators'
 
 export const neighborhoodsRoute = new Hono<AppEnv>()
 
@@ -34,9 +34,7 @@ async function todaysColor(
     ? (await getPaletteColors(db, nb.paletteId)).map((c) => ({ hex: c.hex, name: c.name }))
     : []
   const def = await getDefaultPalette(db)
-  const defColors: ColorEntry[] = def
-    ? (await getPaletteColors(db, def.id)).map((c) => ({ hex: c.hex, name: c.name }))
-    : []
+  const defColors: ColorEntry[] = def ? (await getPaletteColors(db, def.id)).map((c) => ({ hex: c.hex, name: c.name })) : []
 
   const list = resolveColorList({
     customColors: parseCustomColors(nb.customColors),
@@ -186,7 +184,9 @@ neighborhoodsRoute.patch('/:id', requireAdminSecret, zJson(patchSchema), async (
   }
   await updateNeighborhood(db, nb.id, patch)
   const updated = await getNeighborhood(db, nb.id)
-  return c.json(await serializeConfig(db, updated!))
+  // Absent only if the row was deleted concurrently with this PATCH.
+  if (!updated) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
+  return c.json(await serializeConfig(db, updated))
 })
 
 // Delete

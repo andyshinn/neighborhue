@@ -1,4 +1,4 @@
-import { strHash, mulberry32 } from './hash'
+import { mulberry32, strHash } from './hash'
 
 // Deterministic, evenly-distributed selection from an ordered color list.
 // Each cycle of n days is a fresh seeded Fisher-Yates permutation of [0..n),
