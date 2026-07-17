@@ -25,7 +25,7 @@ pnpm check         # biome lint + format (read-only)
 ## Provision (one-time)
 
 ```bash
-pnpm -F @neighborhue/api exec wrangler d1 create neighborhue   # copy database_id into wrangler.toml
+pnpm -F @neighborhue/api exec wrangler d1 create neighborhue   # copy database_id into apps/api/wrangler.jsonc
 pnpm -F @neighborhue/api db:generate                           # generate migrations from schema
 pnpm -F @neighborhue/api db:migrate:local                      # apply locally
 pnpm -F @neighborhue/api seed:local                            # seed the 7 palettes locally

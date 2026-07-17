@@ -20,7 +20,7 @@ The color for a neighborhood on a given day is **computed on read** as a pure fu
 
 ## 2. Stack
 
-TypeScript (strict) · Hono · Cloudflare Workers · D1 (bound as `DB`) · Drizzle ORM (`drizzle-orm/d1`) · Zod + `@hono/zod-validator` · Luxon · Vitest + `@cloudflare/vitest-pool-workers`. Package manager: **npm**.
+TypeScript (strict) · Hono · Cloudflare Workers · D1 (bound as `DB`) · Drizzle ORM (`drizzle-orm/d1`) · Zod + `@hono/zod-validator` · Luxon · Vitest + `@cloudflare/vitest-pool-workers`. Package manager: **pnpm** (migrated from npm on 2026-07-16, along with Biome for lint/format).
 
 > Before the coding phase, pull current docs via Context7 for `hono`, `drizzle-orm`, `@hono/zod-validator`, and `@cloudflare/vitest-pool-workers` — minor APIs drift. Reference snippets in the base spec are illustrative, not version-pinned.
 

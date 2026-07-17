@@ -1,7 +1,8 @@
 # Design brief: Neighborhue — frontend SPA
 
-> Handoff brief for a design tool. The frontend is a **separate repo** and is out of
-> scope for the backend v1. This brief depends only on the product concept and the API
+> Handoff brief for a design tool. The frontend lives at `apps/web` in this monorepo
+> (see [`docs/superpowers/specs/2026-07-16-monorepo-restructure-design.md`](superpowers/specs/2026-07-16-monorepo-restructure-design.md))
+> and is out of scope for the backend v1. This brief depends only on the product concept and the API
 > contract (see [`docs/superpowers/specs/2026-07-15-neighborhue-backend-design.md`](superpowers/specs/2026-07-15-neighborhue-backend-design.md)),
 > so it can be designed in parallel with the backend build.
 
