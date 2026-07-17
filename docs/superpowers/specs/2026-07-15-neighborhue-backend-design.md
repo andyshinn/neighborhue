@@ -88,7 +88,7 @@ Reference implementations in base spec §4 are the intended shape; verify APIs a
 
 ## 7. Palettes & seed data
 
-Seed **seven** palettes on first deploy via `seed/palettes.ts` (`npm run seed`). `rainbow` is the only `is_default`. All colors are valid `^#[0-9A-Fa-f]{6}$` and high-saturation. `position` is the listed order (0-based); `palette_colors.id` generated per row (uuid) with `position` as the stable sort key.
+Seed **seven** palettes on first deploy via `seed/palettes.ts` (`pnpm -F @neighborhue/api seed`). `rainbow` is the only `is_default`. All colors are valid `^#[0-9A-Fa-f]{6}$` and high-saturation. `position` is the listed order (0-based); `palette_colors.id` generated per row (uuid) with `position` as the stable sort key.
 
 ### 7.1 `rainbow` — "Rainbow Colors" (default)
 `#FF0000` Red · `#FF8000` Orange · `#FFD700` Yellow · `#00FF00` Green · `#0080FF` Blue · `#4B0082` Indigo · `#8000FF` Violet
@@ -142,7 +142,7 @@ Then `test/api.test.ts` runs against `@cloudflare/vitest-pool-workers` with migr
 Wrangler is installed and authorized (D9). Live steps run with a confirmation before each account-touching command:
 1. `wrangler d1 create neighborhue` → capture `database_id` into `wrangler.toml`.
 2. `drizzle-kit generate` → `wrangler d1 migrations apply neighborhue` (local, then remote on confirm).
-3. `npm run seed` (local, then remote on confirm).
+3. `pnpm -F @neighborhue/api seed` (local, then remote on confirm).
 4. `wrangler deploy`.
 
 Everything before deployment (scaffold, lib + tests, schema/migrations/seed, routes, API tests) runs fully locally against the Workers/D1 pool.

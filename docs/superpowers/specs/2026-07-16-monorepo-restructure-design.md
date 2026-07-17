@@ -125,6 +125,10 @@ import type { AppType } from '@neighborhue/api'   // erased at compile time
 
 > **Constraint (load-bearing):** `apps/web` imports **types only** from `@neighborhue/api`. Importing a runtime value would put untranspiled TypeScript into Vite's graph and require a build step for the API package. If runtime sharing is ever needed, that is the trigger to create `packages/shared` (M3) — not to relax this rule.
 
+**Qualification — this is safe on the bundling axis, not the typechecking axis.** The argument above concerns erasure only. On typechecking, `apps/web`'s `tsc` walks `apps/api`'s entire import graph reachable from `AppType` and checks it under **`apps/web`'s own compiler options**, not `apps/api`'s. Because `apps/web/tsconfig.json` sets `"types": []` (M11), any ambient Cloudflare Workers global reachable from that graph must have a stub in `apps/web/src/global.d.ts` or the build fails with `Cannot find name 'X'`. Today that's exactly one global: `D1Database`, reached transitively through `types.ts` → `db/queries` → `db/client.ts`'s `getDb(d1: D1Database)` — not through `AppType`'s Hono generics.
+
+The failure mode this produces is easy to misdiagnose: a `Cannot find name 'X'` error pointing at an `apps/api` file *looks* like the RPC contract broke, but it isn't a contract break — it means "add a stub for `X` in `apps/web/src/global.d.ts`." See §9 for the durable fix and why it's deferred.
+
 ---
 
 ## 5. RPC route chaining
@@ -245,3 +249,12 @@ Part of this change, not follow-up:
 - Workers Builds / CI setup. Deploys stay manual via Wrangler; no CI exists in the repo today. Root directory + build watch paths are the mechanism if that changes.
 - Any change to API behavior, routes, schema, or the deployed `api.neighborhue.app` Worker. It is live but unannounced (testing only), so no migration or compatibility story is needed — but the Worker must keep deploying to the same name (`neighborhue-api`) and domain.
 - OG tag injection via `run_worker_first` (§6.2, deferred).
+- **Follow-up: have `apps/api` emit `.d.ts`.** This is the durable fix for the stub-maintenance burden described in §4 — replaces "typecheck `apps/api`'s raw source" with "typecheck a generated declaration file," so `apps/web` no longer needs to mirror `apps/api`'s ambient globals in `global.d.ts`.
+
+  | | |
+  |---|---|
+  | Already in place | `skipLibCheck: true` is already set in `tsconfig.base.json` and inherited by `apps/web` — half of what emitting `.d.ts` needs is done. Remaining work is the emit itself plus **build-ordering guarantees** (`apps/web` typecheck must not run against a missing or stale `apps/api` build). |
+  | Why deferring is correct, not lazy | Doing this today would be a net regression: a stale `dist/` would let `apps/web` typecheck cleanly against **yesterday's** contract — the seam would *pass when it should fail*, silently. That's the exact failure class the monorepo restructure exists to prevent (§1). Raw `.ts`, by contrast, can never be stale — it's read live on every typecheck. |
+  | Why the trigger hasn't fired | The stub problem only grows if `apps/api` gains bindings beyond D1 (`KVNamespace`, `R2Bucket`, `Queue`, `DurableObjectNamespace`, ...). Decision **D6** in [`2026-07-15-neighborhue-backend-design.md`](2026-07-15-neighborhue-backend-design.md) makes the Worker stateless apart from D1 config a hard constraint — in-Worker rate limiting is an explicit non-goal — so a new binding is not imminent. |
+  | Do it when | Either the API gains a non-D1 binding, or the frontend lands its build pipeline (whichever comes first). The latter is the natural trigger because that's when Vite and a real task runner arrive, making it cheap to sequence the emit correctly instead of bolting on ad hoc ordering now. |
+  | The DOM-vs-Worker `Response` divergence (§4/M11) does not compound this | Established during review: it has zero surface in current code and cannot corrupt the contract types. Payload types in `AppType` come from Hono's `TypedResponse._data`, computed from the object literals passed to `c.json(...)` — global `Response` never contributes to them. So the seam fails loudly (a name-lookup error) or not at all; it cannot silently mislead. |

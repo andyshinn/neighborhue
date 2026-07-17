@@ -10,7 +10,7 @@ rotates once a day at a locally chosen hour. Colors are computed from
 This is a pnpm workspace:
 
 - `apps/api` — this Worker (`@neighborhue/api`)
-- `apps/web` — companion web app (planned)
+- `apps/web` — companion web app (scaffold — typed API client; frontend not yet built)
 
 ## Develop
 
