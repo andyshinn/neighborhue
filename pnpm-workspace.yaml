@@ -1,3 +1,6 @@
+packages:
+  - 'apps/*'
+
 # Native build scripts pnpm is allowed to run during install.
 # esbuild + workerd are required by wrangler and the vitest Workers pool.
 # sharp is a transitive wrangler dep used only for image features this

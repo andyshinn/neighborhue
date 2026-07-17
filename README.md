@@ -5,11 +5,18 @@ for a neighborhood. Devices poll one endpoint and all show the same color, which
 rotates once a day at a locally chosen hour. Colors are computed from
 `(neighborhood_id, day_index)` — never stored, no cron.
 
+## Repository layout
+
+This is a pnpm workspace:
+
+- `apps/api` — this Worker (`@neighborhue/api`)
+- `apps/web` — companion web app (planned)
+
 ## Develop
 
 ```bash
 pnpm install
-pnpm test          # vitest (Workers pool)
+pnpm test          # vitest (Workers pool), all workspace packages
 pnpm dev           # wrangler dev
 pnpm format        # biome format --write
 pnpm check         # biome lint + format (read-only)
@@ -18,17 +25,17 @@ pnpm check         # biome lint + format (read-only)
 ## Provision (one-time)
 
 ```bash
-pnpm exec wrangler d1 create neighborhue   # copy database_id into wrangler.toml
-pnpm db:generate                           # generate migrations from schema
-pnpm db:migrate:local                      # apply locally
-pnpm seed:local                            # seed the 7 palettes locally
+pnpm -F @neighborhue/api exec wrangler d1 create neighborhue   # copy database_id into wrangler.toml
+pnpm -F @neighborhue/api db:generate                           # generate migrations from schema
+pnpm -F @neighborhue/api db:migrate:local                      # apply locally
+pnpm -F @neighborhue/api seed:local                            # seed the 7 palettes locally
 ```
 
 ## Deploy
 
 ```bash
-pnpm db:migrate:remote
-pnpm seed:remote
+pnpm -F @neighborhue/api db:migrate:remote
+pnpm -F @neighborhue/api seed:remote
 pnpm deploy
 ```
 

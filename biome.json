@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!migrations", "!seed/seed.sql"]
+    "includes": ["**", "!**/migrations/**", "!**/seed.sql"]
   },
   "formatter": {
     "enabled": true,
