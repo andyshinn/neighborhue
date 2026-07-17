@@ -1,0 +1,16 @@
+{
+  "name": "@neighborhue/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@neighborhue/api": "workspace:*",
+    "hono": "^4.12.30"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

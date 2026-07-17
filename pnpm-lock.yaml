@@ -58,6 +58,19 @@ importers:
         specifier: ^4.111.0
         version: 4.111.0(@cloudflare/workers-types@5.20260716.1)
 
+  apps/web:
+    dependencies:
+      '@neighborhue/api':
+        specifier: workspace:*
+        version: link:../api
+      hono:
+        specifier: ^4.12.30
+        version: 4.12.30
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
 packages:
 
   '@biomejs/biome@2.5.4':
