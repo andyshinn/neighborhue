@@ -4,7 +4,9 @@
 **Status:** Approved for planning
 **Supersedes:** the "frontend is a separate repo" assumption recorded in [`docs/frontend-design-brief.md`](../../frontend-design-brief.md) (line 3) and the `Package manager: **npm**` line in [`2026-07-15-neighborhue-backend-design.md`](2026-07-15-neighborhue-backend-design.md) §2 (the project has since moved to pnpm + Biome).
 
-Restructures the repository from a single-app layout into a pnpm workspace holding the existing API and a new frontend, and establishes a compile-time-checked type contract between them.
+Restructures the repository from a single-app layout into a pnpm workspace holding the existing API and a scaffolded frontend package, and establishes a compile-time-checked type contract between them.
+
+**This change does not build the frontend.** A separate session owns the frontend design spec; `apps/web` here is a package boundary and a typed client, nothing more (§6).
 
 ---
 
@@ -29,14 +31,16 @@ Everything else (atomic commits, one lockfile, one Biome config) is real but sec
 | M3 | Shared code package | **None.** No `packages/shared` in this change. | YAGNI. `apps/web` depends on `@neighborhue/api` directly for types. Revisit only when non-type code is genuinely shared. |
 | M4 | API config format | **`wrangler.toml` → `wrangler.jsonc`** | Cloudflare's current guidance; newer features are JSON-only; `$schema` gives editor autocomplete. Nothing in the current config is TOML-dependent. |
 | M5 | Type sharing mechanism | `apps/api` exports `AppType`; `apps/web` consumes via `hc<AppType>` | The reason for M1. Requires the route chaining in §5. |
-| M6 | Web stack | **Vite + React + Radix Primitives + Radix Colors** | Radix is React-only, which settles the framework. No SSR need — the color is deterministic and reads are public. |
+| M6 | Web stack | **Vite + React + Radix Primitives + Radix Colors** — *recorded as input to the frontend spec, not installed here (M14)* | Radix is React-only, which settles the framework. No SSR need — the color is deterministic and reads are public. |
 | M7 | Radix Themes vs Primitives | **Primitives, not Themes** | Themes' `accentColor` takes predefined named scales; custom brand colors require a 12-step scale generated offline and pasted as static CSS. Neighborhue's accent is an arbitrary hex that changes daily and may be user-defined. Themes would fight the core hook (§6). |
 | M8 | Next.js / OpenNext | **Rejected** | Requires the `@opennextjs/cloudflare` adapter for a runtime we don't need. No SSR requirement. Dynamic OG tags — the one real argument — are solvable with `run_worker_first` on the share route alone. |
-| M9 | Web deploy target | Worker with static assets, `not_found_handling: "single-page-application"` | Client-side routes never invoke the Worker, so SPA routing costs nothing. |
+| M9 | Web deploy target | Worker with static assets, `not_found_handling: "single-page-application"` — *recorded as input to the frontend spec, not configured here (M14)* | Client-side routes never invoke the Worker, so SPA routing costs nothing. |
 | M10 | Biome | **One config at the repo root** | A single lint/format standard across both apps. Requires the glob fix in §3.2. |
 | M11 | TypeScript config | `tsconfig.base.json` + per-app configs | Non-negotiable, not cosmetic: `apps/web` needs `lib: ["DOM"]` and **must not** inherit `@cloudflare/workers-types`. |
-| M12 | `apps/web` scope | **Wiring stub only** | Proves the type seam end-to-end. The real frontend is its own design pass (§6). |
+| M12 | `apps/web` scope | **Workspace scaffold only** — package boundary + typed client, no framework | A separate session owns the frontend spec. This change must not pre-empt it. Scaffold enough to prove the type seam (§7.5) and nothing more (§6). |
 | M13 | Commit sequencing | **Move and RPC refactor are separate commits** | The RPC refactor re-indents ~170 lines and would otherwise swamp the file moves in review (§5). |
+| M14 | Web framework install | **Deferred to the frontend spec.** No `react`, `radix`, `vite`, or `wrangler.jsonc` in `apps/web` in this change. | M6–M8 record the *reasoning* (React via Radix; Vite SPA; not Next.js) as input to that spec, but installing them here would create merge conflicts with the other session and bake in choices this change has no need to make. |
+| M15 | `wrangler` placement | **Per-app devDependency, not hoisted to the root** | Resolves from each package's own `node_modules/.bin` with no reliance on pnpm's implicit root-bin PATH behavior, and lets the apps drift versions independently. Costs minor lockfile duplication. |
 
 ---
 
@@ -59,13 +63,11 @@ neighborhue/
     │   ├── vitest.config.ts
     │   ├── drizzle.config.ts
     │   ├── migrations/  seed/  src/  test/
-    └── web/
+    └── web/                # scaffold only — frontend spec owns the rest (M12/M14)
         ├── package.json    # @neighborhue/web
-        ├── wrangler.jsonc  # assets + SPA mode
-        ├── tsconfig.json
-        ├── vite.config.ts
-        ├── index.html
+        ├── tsconfig.json   # extends ../../tsconfig.base.json; DOM lib
         └── src/
+            └── lib/client.ts   # hc<AppType>
 ```
 
 ### 3.1 What moves without edits
@@ -94,9 +96,11 @@ neighborhue/
 
 - **Root** — `@biomejs/biome`, `packageManager`, workspace proxy scripts (`pnpm -F @neighborhue/api dev`, `pnpm -r test`, `pnpm -r typecheck`). Biome runs from the root across the whole repo.
 - **`apps/api`** — runtime: `hono`, `drizzle-orm`, `zod`, `luxon`, `@hono/zod-validator`. Dev: `wrangler`, `vitest`, `@cloudflare/vitest-pool-workers`, `@cloudflare/workers-types`, `drizzle-kit`, `tsx`, `@types/luxon`, `@types/node`, `typescript`.
-- **`apps/web`** — runtime: `@neighborhue/api` (`workspace:*`), `react`, `react-dom`, `hono` (for `hono/client`), `@radix-ui/*` primitives, `@radix-ui/colors`. Dev: `vite`, `@cloudflare/vite-plugin`, `@vitejs/plugin-react`, `wrangler`, `typescript`, `@types/react`, `@types/react-dom`.
+- **`apps/web`** — runtime: `@neighborhue/api` (`workspace:*`), `hono` (for `hono/client`). Dev: `typescript`. **Nothing else** — see M14 / §6.2.
 
-> **Planning note:** `typescript` is declared per-app rather than only at the root, so `tsc` resolves from each package's own `node_modules/.bin` regardless of pnpm's root-bin PATH behavior. The plan should verify whether the root declaration is additionally needed rather than assume it.
+`wrangler` is declared **per-app, not hoisted** (M15): resolution comes from each package's own `node_modules/.bin` with no dependence on pnpm's root-bin PATH behavior, and the two apps can drift versions independently. In this change only `apps/api` declares it; `apps/web` picks it up when the frontend spec adds its Worker config.
+
+> **Planning note:** `typescript` is likewise declared per-app rather than only at the root, so `tsc` resolves unambiguously from each package. The plan should verify whether a root declaration is additionally needed rather than assume it either way.
 
 ---
 
@@ -163,18 +167,44 @@ Per M13 this lands as its own commit, after the move.
 
 ## 6. `apps/web` scope
 
-A **wiring stub**, not the frontend:
+> **Coordination:** a separate session owns the frontend design spec. This change establishes only the *package boundary* so that spec has a place to land. It deliberately installs no framework (M14).
 
-- `hc<AppType>` client in `src/lib/client.ts` — the artifact being proven
-- One screen rendering today's color for a neighborhood
-- Enough Radix Primitives to confirm they're wired
-- `wrangler.jsonc` with `assets.not_found_handling: "single-page-application"`
+### 6.1 In scope — the whole of it
 
-Explicitly **not** in scope: the four screens, visual direction, and states in [`docs/frontend-design-brief.md`](../../frontend-design-brief.md). That brief remains the input to a later design pass.
+```
+apps/web/
+├── package.json      # @neighborhue/web; deps: @neighborhue/api (workspace:*), hono
+├── tsconfig.json     # extends ../../tsconfig.base.json; lib: ["DOM", "ES2022"]
+└── src/
+    └── lib/client.ts # hc<AppType> — the artifact being proven
+```
 
-**Color architecture (decided now because it constrains M7):** Radix Colors supplies the *stable* chrome — grays, light/dark. The *daily* hue is a CSS custom property computed from the API's `color: {hex, rgb, hsl, name}` response, with a WCAG-AA foreground derived at runtime. `src/lib/color.ts` already owns this math; Radix Themes would duplicate and conflict with it.
+`src/lib/client.ts` is framework-agnostic and roughly:
 
-**Deferred, recorded so it isn't lost:** the share page is the product's hero and is expected to be pasted into group chats, so per-neighborhood OG meta tags matter. The plan is `run_worker_first: ["/n/*"]` on the share route only, letting the Worker inject OG tags while everything else stays static. Not built in this change; it is the reason M8 rejects Next.js without cost.
+```ts
+import { hc } from 'hono/client'
+import type { AppType } from '@neighborhue/api'
+
+export const createClient = (baseUrl: string) => hc<AppType>(baseUrl)
+```
+
+> **Deliberately takes `baseUrl` as a parameter rather than reading `import.meta.env.VITE_API_URL`.** `import.meta.env` is a Vite construct requiring `vite/client` types, which M14 defers — using it here would fail `pnpm -F @neighborhue/web typecheck` and break the very seam test it exists to enable. The frontend spec wires in config resolution when it adds Vite.
+
+**Why this file exists at all, given "scaffold only":** §7.5 is the only check that proves the restructure achieved its purpose, and it requires something to import `AppType`. Without it, the workspace would be structurally valid but the seam unverified — the restructure could be silently broken and every other check would still pass. This is the minimum that makes the change falsifiable.
+
+### 6.2 Explicitly deferred to the frontend spec
+
+`react`, `react-dom`, `@radix-ui/*`, `vite`, `@vitejs/plugin-react`, `@cloudflare/vite-plugin`, `wrangler`, `index.html`, `vite.config.ts`, and `wrangler.jsonc` — plus every screen, state, and visual decision in [`docs/frontend-design-brief.md`](../../frontend-design-brief.md).
+
+M6–M8 are **recorded reasoning, not commitments made here**, and should be treated as input to that spec:
+
+- **Radix is React-only** — choosing Radix settles the framework question.
+- **Radix Primitives over Themes (M7)** — Themes' `accentColor` takes predefined scales; a custom brand color needs a 12-step scale generated offline and pasted as static CSS. Neighborhue's accent is arbitrary hex, changes daily, and may be user-defined, so Themes fights the core hook. Use Radix Colors for the *stable* chrome (grays, light/dark) and a CSS custom property for the daily hue, with a WCAG-AA foreground derived at runtime from the API's `color: {hex, rgb, hsl, name}`. `apps/api/src/lib/color.ts` already owns that math.
+- **Next.js/OpenNext rejected (M8)** — no SSR need. The one real counter-argument is per-neighborhood OG meta tags, since the share page is the hero and gets pasted into group chats. That's reachable with `run_worker_first: ["/n/*"]` on the share route alone, letting the Worker inject OG tags while everything else stays static. Recorded here so the reasoning isn't relitigated.
+
+### 6.3 Known conflict risk
+
+If the other session's frontend spec assumes a **separate repo** (as [`docs/frontend-design-brief.md`](../../frontend-design-brief.md) line 3 still says) or a different directory layout, the two specs disagree and this one is newer. Reconcile before implementing the frontend — see §8.
 
 ---
 
@@ -183,11 +213,12 @@ Explicitly **not** in scope: the four screens, visual direction, and states in [
 1. `pnpm install` resolves the workspace; `@neighborhue/api` symlinks into `apps/web/node_modules`.
 2. `pnpm -r typecheck` and `pnpm -r test` pass — **the existing API suite green and unmodified**.
 3. `pnpm check` (Biome) passes from the root across both apps, and still ignores `migrations/` and `seed.sql`.
-4. `wrangler deploy --dry-run -c apps/api/wrangler.jsonc` succeeds, confirming the TOML→JSONC conversion.
-5. `wrangler dev -c apps/web/wrangler.jsonc -c apps/api/wrangler.jsonc` starts both Workers.
-6. **The seam test — the only proof the monorepo earns its keep:** rename a response field in `apps/api/src/validators.ts` and confirm `pnpm -F @neighborhue/web typecheck` **fails**. Revert. If this passes, the RPC wiring is broken regardless of what else is green.
+4. `wrangler deploy --dry-run -c apps/api/wrangler.jsonc` succeeds, confirming the TOML→JSONC conversion preserved the D1 binding, custom domain route, and vars.
+5. **The seam test — the only proof the monorepo earns its keep:** rename a response field in `apps/api/src/validators.ts` and confirm `pnpm -F @neighborhue/web typecheck` **fails**. Revert. If this *passes*, the RPC wiring is broken regardless of what else is green.
 
-No API behavior changes in this work. A green existing suite is therefore meaningful signal, not a formality.
+No API behavior changes in this work. A green existing suite is therefore meaningful signal, not a formality — and per §5 any test edit is a red flag to investigate, not accommodate.
+
+**Not verifiable in this change:** multi-Worker dev (`wrangler dev -c apps/web/… -c apps/api/…`) needs `apps/web` to have a Worker config, which M14 defers. The API's own `wrangler dev` still works. Multi-Worker dev becomes verifiable once the frontend spec lands its config.
 
 ---
 
@@ -195,7 +226,7 @@ No API behavior changes in this work. A green existing suite is therefore meanin
 
 Part of this change, not follow-up:
 
-- `docs/frontend-design-brief.md:3` — "The frontend is a **separate repo**" is now false.
+- `docs/frontend-design-brief.md:3` — "The frontend is a **separate repo**" is now false. **Coordinate before editing:** the other session may be actively working from this brief. Keep the edit to the single stale claim — do not restructure the brief, since it is that session's input.
 - `README.md` — root-level commands (`pnpm run seed`, `wrangler deploy`, `pnpm test`) all move under `apps/api`.
 - `2026-07-15-neighborhue-backend-design.md` §2 — `Package manager: **npm**` is stale (project now uses pnpm + Biome). Correct in place or annotate as superseded.
 
@@ -203,8 +234,8 @@ Part of this change, not follow-up:
 
 ## 9. Out of scope
 
-- The real frontend build (the four screens in the design brief).
+- **The frontend, entirely** — framework install, build tooling, Worker config, and every screen in the design brief. Owned by the frontend spec (M12/M14, §6.2).
 - `packages/shared` (M3).
 - Workers Builds / CI setup. Deploys stay manual via Wrangler; no CI exists in the repo today. Root directory + build watch paths are the mechanism if that changes.
-- Any change to API behavior, routes, schema, or the deployed `api.neighborhue.app` Worker.
-- OG tag injection via `run_worker_first` (§6, deferred).
+- Any change to API behavior, routes, schema, or the deployed `api.neighborhue.app` Worker. It is live but unannounced (testing only), so no migration or compatibility story is needed — but the Worker must keep deploying to the same name (`neighborhue-api`) and domain.
+- OG tag injection via `run_worker_first` (§6.2, deferred).
