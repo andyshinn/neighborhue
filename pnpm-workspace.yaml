@@ -13,3 +13,11 @@ allowBuilds:
 # release-age gate flagged as too new so installs stay reproducible.
 minimumReleaseAgeExclude:
   - '@cloudflare/workers-types@5.20260716.1'
+  - '@cloudflare/vite-plugin@1.45.1'
+  - '@tanstack/react-start-rsc@0.1.29'
+  - '@tanstack/react-start@1.168.30'
+  - '@tanstack/router-generator@1.167.21'
+  - '@tanstack/router-plugin@1.168.22'
+  - '@tanstack/start-plugin-core@1.171.22'
+  - miniflare@4.20260714.0
+  - wrangler@4.112.0

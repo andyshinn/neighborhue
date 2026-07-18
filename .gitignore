@@ -5,3 +5,6 @@ dist/
 **/seed.sql
 *.log
 docs/handoff/
+.env
+.output/
+apps/*/dist/

@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "neighborhue-web",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Apex reserved for the frontend (see apps/api/wrangler.jsonc). Cloudflare
+  // provisions DNS + SSL on deploy. Configured now; deploy is Task 9.
+  "routes": [{ "pattern": "neighborhue.app", "custom_domain": true }]
+}
