@@ -18,7 +18,7 @@ import { newAdminSecret, newNeighborhoodId } from '../lib/ids'
 import { pickColorIndex } from '../lib/pick'
 import { rotation } from '../lib/rotation'
 import { requireAdminSecret } from '../middleware/auth'
-import type { AppEnv } from '../types'
+import type { AppEnv, PublicNeighborhood } from '../types'
 import { createSchema, patchSchema, zJson } from '../validators'
 
 // Resolves the ordered color list and derives today's color for a neighborhood.
@@ -104,7 +104,7 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
       seconds_until_rotation: info.secondsUntilRotation,
       palette: paletteSlug,
       day_index: dayIndex,
-    })
+    } satisfies PublicNeighborhood)
   })
   // Create
   .post('/', zJson(createSchema), async (c) => {

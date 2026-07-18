@@ -1,4 +1,5 @@
 import type { NeighborhoodRow } from './db/queries'
+import type { Color } from './lib/color'
 
 export type AppEnv = {
   Bindings: {
@@ -16,12 +17,11 @@ export type AppEnv = {
 // route also returns text (?format=hex|rgb) and a 304, which collapses
 // `.json()`'s inference. Importing THIS (rather than restating it) keeps the
 // type seam: rename a field here and apps/web fails `tsc` (verified).
-export interface PublicColor {
-  hex: string
-  rgb: [number, number, number]
-  hsl: [number, number, number]
-  name: string | null
-}
+//
+// PublicColor is the API's own `Color` (single source — no duplication), and
+// the GET /:id handler asserts `satisfies PublicNeighborhood`, so producer-side
+// drift fails the API's own typecheck rather than only surfacing downstream.
+export type PublicColor = Color
 export interface PublicNeighborhood {
   id: string
   name: string | null

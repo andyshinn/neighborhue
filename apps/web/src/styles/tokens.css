@@ -2,10 +2,11 @@
    imports below. IMPORTANT: @radix-ui/colors ships its dark scales scoped to a
    `.dark` / `.dark-theme` CLASS, not a media query, so importing the *-dark.css
    files would NOT activate on the system setting. Auto (system-following) dark
-   mode therefore lives in the @media block below, where we re-declare only the
-   dark scale steps we actually use — that makes every semantic token that
-   references them (including the CTA inversion) flip automatically. A manual
-   light/dark toggle is a Spec 2 concern (YAGNI here). */
+   mode therefore lives in the @media block below, where we re-declare the dark
+   scale steps — that makes every semantic token that references them (including
+   the CTA inversion) flip automatically. The full Sand ramp is declared (not
+   just the steps used today) so dark mode is safe by construction for Spec 2.
+   A manual light/dark toggle is a Spec 2 concern (YAGNI here). */
 @import "@radix-ui/colors/sand.css";
 @import "@radix-ui/colors/sand-alpha.css";
 @import "@radix-ui/colors/indigo.css";
@@ -49,17 +50,39 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Radix dark-scale values (from @radix-ui/colors 3.0.0 *-dark.css), only the
-       steps referenced above. Re-declaring the raw scale vars here flips every
-       semantic token that references them. sRGB values (P3-dark not mapped —
-       acceptable fidelity tradeoff for the foundation). */
+    /* Full Radix Sand dark ramp (from @radix-ui/colors 3.0.0 sand-dark.css +
+       sand-dark-alpha.css). Declaring the WHOLE ramp — not just the steps used
+       today — makes dark mode safe by construction: any Sand step a later screen
+       reaches for gets its correct dark value automatically, with no silent
+       light-in-dark fallback. sRGB (P3-dark not mapped — acceptable tradeoff).
+       NOTE: the accent scales below are still the used subset; a new indigo /
+       red / green / amber STEP used in dark mode must be added here too. */
     --sand-1: #111110;
     --sand-2: #191918;
     --sand-3: #222221;
+    --sand-4: #2a2a28;
+    --sand-5: #31312e;
+    --sand-6: #3b3a37;
+    --sand-7: #494844;
+    --sand-8: #62605b;
+    --sand-9: #6f6d66;
     --sand-10: #7c7b74;
     --sand-11: #b5b3ad;
     --sand-12: #eeeeec;
+    --sand-a1: #00000000;
+    --sand-a2: #f4f4f309;
+    --sand-a3: #f6f6f513;
+    --sand-a4: #fefef31b;
     --sand-a5: #fbfbeb23;
+    --sand-a6: #fffaed2d;
+    --sand-a7: #fffbed3c;
+    --sand-a8: #fff9eb57;
+    --sand-a9: #fffae965;
+    --sand-a10: #fffdee73;
+    --sand-a11: #fffcf4b0;
+    --sand-a12: #fffffded;
+
+    /* accent dark steps (used subset — see note above) */
     --indigo-9: #3e63dd;
     --indigo-10: #5472e4;
     --red-3: #3b1219;
