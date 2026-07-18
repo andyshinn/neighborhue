@@ -42,6 +42,12 @@ Everything else (atomic commits, one lockfile, one Biome config) is real but sec
 | M14 | Web framework install | **Deferred to the frontend spec.** No `react`, `radix`, `vite`, or `wrangler.jsonc` in `apps/web` in this change. | M6–M8 record the *reasoning* (React via Radix; Vite SPA; not Next.js) as input to that spec, but installing them here would create merge conflicts with the other session and bake in choices this change has no need to make. |
 | M15 | `wrangler` placement | **Per-app devDependency, not hoisted to the root** | Resolves from each package's own `node_modules/.bin` with no reliance on pnpm's implicit root-bin PATH behavior, and lets the apps drift versions independently. Costs minor lockfile duplication. |
 
+> **Amended by the frontend foundation spec ([`2026-07-17-frontend-foundation-design.md`](2026-07-17-frontend-foundation-design.md) §10.2), during its implementation on 2026-07-17:**
+> - **M6** → **TanStack Start** (brings Vite + React + TanStack Router) + Radix Primitives + Radix Colors. Start settles the framework and router by inclusion.
+> - **M8** → Next.js / OpenNext is **still rejected**, but the *"no SSR requirement" rationale is overturned.* SSR is adopted **selectively** via TanStack Start, which delivers the dynamic OG tags this row called "the one real argument" declaratively from the route loader — no `run_worker_first` needed. The conclusion (not Next.js) stands; the reasoning does not.
+> - **M9** → **Start server entry with selective SSR** — SSR on `/` and `/n/:id` (the color is the content + OG unfurls), `ssr: false` on `/create` and `/manage/:id` — not static-assets-with-SPA-`not_found_handling`. Deployed as a Worker on the apex `neighborhue.app`.
+> - **M14** → **Discharged.** The frontend foundation spec is that spec; `react`, `radix`, `vite`, `@tanstack/*`, and `apps/web/wrangler.jsonc` are now installed and configured.
+
 ---
 
 ## 3. Target layout
