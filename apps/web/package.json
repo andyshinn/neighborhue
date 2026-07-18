@@ -7,6 +7,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "deploy": "vite build && wrangler deploy"
   },
   "dependencies": {
@@ -25,11 +27,15 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.45.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "happy-dom": "^20.10.6",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
+    "vitest": "^4.1.10",
     "wrangler": "^4.112.0"
   }
 }
