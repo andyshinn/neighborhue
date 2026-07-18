@@ -7,8 +7,6 @@
     "dev": "vite dev",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "deploy": "vite build && wrangler deploy"
   },
   "dependencies": {
