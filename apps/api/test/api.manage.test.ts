@@ -23,7 +23,8 @@ describe('POST /v1/neighborhoods', () => {
     expect(body.id).toMatch(/^[0-9a-f-]{36}$/)
     expect(body.admin_secret.startsWith('nh_sk_')).toBe(true)
     expect(body.admin_secret.slice(6).length).toBeGreaterThanOrEqual(43)
-    expect(body.manage_url).toBe(`https://neighborhue.app/manage/${body.admin_secret}`)
+    // the id is a path segment, the secret is the fragment
+    expect(body.manage_url).toBe(`https://neighborhue.app/manage/${body.id}#${body.admin_secret}`)
     expect(body.palette).toBe('rainbow')
   })
 

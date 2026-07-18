@@ -136,7 +136,7 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
       {
         id,
         admin_secret: adminSecret,
-        manage_url: `${c.env.MANAGE_URL_BASE}/manage/${adminSecret}`,
+        manage_url: `${c.env.MANAGE_URL_BASE}/manage/${id}#${adminSecret}`,
         name: row.name,
         timezone: row.timezone,
         rotation_hour: row.rotationHour,
