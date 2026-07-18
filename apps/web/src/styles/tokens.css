@@ -1,0 +1,78 @@
+/* Radix Colors — plain CSS, no Themes. Light scale lives at :root via the
+   imports below. IMPORTANT: @radix-ui/colors ships its dark scales scoped to a
+   `.dark` / `.dark-theme` CLASS, not a media query, so importing the *-dark.css
+   files would NOT activate on the system setting. Auto (system-following) dark
+   mode therefore lives in the @media block below, where we re-declare only the
+   dark scale steps we actually use — that makes every semantic token that
+   references them (including the CTA inversion) flip automatically. A manual
+   light/dark toggle is a Spec 2 concern (YAGNI here). */
+@import "@radix-ui/colors/sand.css";
+@import "@radix-ui/colors/sand-alpha.css";
+@import "@radix-ui/colors/indigo.css";
+@import "@radix-ui/colors/red.css";
+@import "@radix-ui/colors/green.css";
+@import "@radix-ui/colors/amber.css";
+
+:root {
+  color-scheme: light dark; /* native controls/scrollbars follow the theme too */
+
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  /* neutrals (light) */
+  --page-bg: var(--sand-3); /* #f1f0ef ≈ handoff #f1efec */
+  --surface: #ffffff; /* deliberate: crisp white card on the warm page (spec §5.1) */
+  --surface-2: var(--sand-2);
+  --text: var(--sand-12);
+  --text-muted: var(--sand-11);
+  --text-faint: var(--sand-10);
+  --hairline: var(--sand-a5);
+
+  /* accents (scale-mapped). indigo-9 / red-9 are identical across light+dark. */
+  --accent: var(--indigo-9); /* #3e63dd exact */
+  --accent-hover: var(--indigo-10);
+  --danger: var(--red-9); /* #e5484d exact */
+  --danger-tint: var(--red-3);
+  --success: var(--green-10);
+  --success-tint: var(--green-3);
+  --warning: var(--amber-11); /* differs from handoff #b7791f — open item, spec §11 */
+  --warning-tint: var(--amber-3);
+
+  /* near-black CTA — inverts in dark automatically because --sand-12 / --sand-1
+     flip to their dark values in the media block below. No dark branch needed. */
+  --cta-bg: var(--sand-12);
+  --cta-fg: var(--sand-1);
+
+  --shadow-card: 0 16px 44px rgba(0, 0, 0, 0.14);
+  --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Radix dark-scale values (from @radix-ui/colors 3.0.0 *-dark.css), only the
+       steps referenced above. Re-declaring the raw scale vars here flips every
+       semantic token that references them. sRGB values (P3-dark not mapped —
+       acceptable fidelity tradeoff for the foundation). */
+    --sand-1: #111110;
+    --sand-2: #191918;
+    --sand-3: #222221;
+    --sand-10: #7c7b74;
+    --sand-11: #b5b3ad;
+    --sand-12: #eeeeec;
+    --sand-a5: #fbfbeb23;
+    --indigo-9: #3e63dd;
+    --indigo-10: #5472e4;
+    --red-3: #3b1219;
+    --red-9: #e5484d;
+    --green-3: #132d21;
+    --green-10: #33b074;
+    --amber-3: #302008;
+    --amber-11: #ffca16;
+
+    /* elevation flips direction between themes: surfaces re-point to other steps */
+    --page-bg: var(--sand-1);
+    --surface: var(--sand-2);
+    --surface-2: var(--sand-3);
+    --shadow-card: 0 16px 44px rgba(0, 0, 0, 0.5);
+  }
+}
