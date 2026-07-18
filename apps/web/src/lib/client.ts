@@ -2,9 +2,10 @@ import type { AppType } from '@neighborhue/api'
 import { hc } from 'hono/client'
 
 /**
- * Typed API client. Takes an explicit baseUrl rather than reading
- * import.meta.env — that is a Vite construct, and Vite is deliberately not
- * installed here yet (see the monorepo restructure spec, M14).
+ * Typed API client. Takes an explicit baseUrl; callers pass
+ * import.meta.env.VITE_API_URL (see src/lib/queries.ts). Vite is now
+ * installed here (frontend foundation spec) — the earlier scaffold note
+ * that it was deliberately absent no longer applies.
  */
 export const createClient = (baseUrl: string) => hc<AppType>(baseUrl)
 
