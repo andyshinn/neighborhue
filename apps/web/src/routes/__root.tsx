@@ -13,6 +13,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: 'Neighborhue' },
     ],
   }),
+  notFoundComponent: () => (
+    <main style={{ padding: 40 }}>
+      <h1>Not found</h1>
+      <p>That neighborhood doesn’t exist. (Styled in Spec 2.)</p>
+    </main>
+  ),
+  errorComponent: ({ error }) => (
+    <main style={{ padding: 40 }}>
+      <h1>Something went wrong</h1>
+      <p>{error.message}</p>
+    </main>
+  ),
   component: RootComponent,
 })
 
