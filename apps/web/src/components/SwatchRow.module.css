@@ -1,0 +1,11 @@
+.row {
+  display: flex;
+  flex-wrap: wrap; /* the `mixed` palette has 20 colors — it must wrap, not overflow */
+  gap: 3px;
+}
+
+.swatch {
+  width: 15px;
+  height: 24px;
+  border-radius: 5px;
+}

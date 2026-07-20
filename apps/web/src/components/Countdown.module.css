@@ -1,0 +1,7 @@
+.countdown {
+  font-family: var(--font-mono);
+  font-size: 52px; /* handoff: share-page countdown is Geist Mono 52 */
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; /* digits must not jitter as they tick */
+}
