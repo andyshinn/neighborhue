@@ -1,0 +1,25 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px; /* handoff: hit targets >= 44px */
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  border-color: transparent;
+}
+
+.button:focus-visible {
+  /* Contrast against an arbitrary daily hue (spec S10). */
+  outline: 2px solid var(--ink, var(--text));
+  outline-offset: 2px;
+}
