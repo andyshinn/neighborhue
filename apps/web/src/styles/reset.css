@@ -57,8 +57,11 @@ a {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion reset must override any animation/transition regardless of specificity — this is the standard a11y pattern */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above — force-disables looping animation under reduced-motion */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above — force-disables transitions under reduced-motion */
     transition-duration: 0.01ms !important;
   }
 }
