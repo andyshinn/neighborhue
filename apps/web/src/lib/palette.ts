@@ -1,12 +1,12 @@
 export interface PaletteColor {
   hex: string
-  name: string
+  name: string | null
 }
 
 export interface PaletteSummary {
   slug: string
   name: string
-  description: string
+  description: string | null
   colors: PaletteColor[]
 }
 

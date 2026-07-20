@@ -1,0 +1,5 @@
+.page {
+  display: flex;
+  flex-wrap: wrap; /* stacks on mobile, per handoff §3 */
+  min-height: 100vh;
+}

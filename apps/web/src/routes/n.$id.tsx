@@ -1,26 +1,32 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, notFound } from '@tanstack/react-router'
+import { useCallback, useEffect, useRef } from 'react'
+import { colorTheme } from '../color/theme'
+import { DetailsPanel } from '../components/DetailsPanel'
 import { ShareColorField } from '../components/ShareColorField'
+import { useCountdown } from '../hooks/useCountdown'
 import { NeighborhoodNotFound } from '../lib/errors'
-import { neighborhoodQueryOptions } from '../lib/queries'
+import { resolvePalette } from '../lib/palette'
+import { neighborhoodQueryOptions, palettesQueryOptions } from '../lib/queries'
+import styles from './n.$id.module.css'
 
 export const Route = createFileRoute('/n/$id')({
   // SSR (default): the hue paints with zero JS and OG tags unfurl.
   loader: async ({ context, params }) => {
     try {
-      // Primes the Query cache so the component's useSuspenseQuery is a hit,
-      // and returns the data so `head` below can read today's live color.
-      return await context.queryClient.ensureQueryData(neighborhoodQueryOptions(params.id))
+      // Both prime the Query cache so the component's useSuspenseQuery calls
+      // are hits; the neighborhood is returned so `head` can read today's color.
+      const [neighborhood] = await Promise.all([
+        context.queryClient.ensureQueryData(neighborhoodQueryOptions(params.id)),
+        context.queryClient.ensureQueryData(palettesQueryOptions()),
+      ])
+      return neighborhood
     } catch (err) {
       // Unknown id -> real 404 status, not a 200 rendering a 404-shaped page.
       if (err instanceof NeighborhoodNotFound) throw notFound()
       throw err
     }
   },
-  // The installed @tanstack/router-core exposes resolved `loaderData` on the
-  // head context (AssetFnContextOptions#loaderData, typed from the loader's
-  // return value), so we use it to unfurl today's actual color rather than a
-  // static title (the stronger spec §9.2 outcome).
   head: ({ loaderData }) => {
     const label = loaderData ? (loaderData.color.name ?? loaderData.color.hex) : 'today’s color'
     return {
@@ -37,7 +43,48 @@ export const Route = createFileRoute('/n/$id')({
 function NeighborhoodShare() {
   const { id } = Route.useParams()
   const { data } = useSuspenseQuery(neighborhoodQueryOptions(id))
-  // paletteName: "" is a temporary bridge (Task 9 resolves and passes the
-  // real palette name once the full two-panel layout is wired up).
-  return <ShareColorField name={data.name} color={data.color} paletteName="" />
+  const { data: palettes } = useSuspenseQuery(palettesQueryOptions())
+  const queryClient = useQueryClient()
+
+  const palette = resolvePalette(data.palette, palettes)
+  const theme = colorTheme(data.color.hex)
+
+  // Rotation rollover (spec S8): refetch after a grace period so the new color
+  // arrives, backing off if the server hasn't rolled over yet (client clock
+  // ahead). Attempts reset whenever a new day's color actually lands.
+  const attempts = useRef(0)
+  useEffect(() => {
+    attempts.current = 0
+  }, [])
+
+  const onExpire = useCallback(() => {
+    const delay = 2000 * 2 ** Math.min(attempts.current, 3) // 2s, 4s, 8s, 16s
+    attempts.current += 1
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ['neighborhood', id] })
+    }, delay)
+  }, [queryClient, id])
+
+  const seconds = useCountdown(data.seconds_until_rotation, data.next_rotation_at, onExpire)
+
+  const shareUrl = typeof window === 'undefined' ? `https://neighborhue.app/n/${id}` : window.location.href
+
+  return (
+    <main className={styles.page}>
+      <ShareColorField
+        name={data.name}
+        color={data.color}
+        paletteName={palette.kind === 'custom' ? 'Custom colors' : palette.name}
+      />
+      <DetailsPanel
+        name={data.name}
+        neighborhoodId={id}
+        shareUrl={shareUrl}
+        seconds={seconds}
+        palette={palette}
+        hue={data.color.hex}
+        ink={theme.ink}
+      />
+    </main>
+  )
 }
