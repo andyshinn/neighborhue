@@ -1,0 +1,65 @@
+.field {
+  flex: 1 1 46%; /* handoff §3 */
+  background: var(--hue);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  gap: 12px;
+  /* Cross-fade when the color rotates. prefers-reduced-motion disables this
+     globally via reset.css (spec S9). */
+  transition:
+    background 0.5s ease,
+    color 0.5s ease;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 18px;
+  background: var(--chip-bg);
+  color: var(--ink);
+}
+
+.bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+}
+
+.name {
+  font-size: clamp(48px, 11vw, 104px); /* handoff: 104 / 600 / -.04em */
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.tagline {
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}

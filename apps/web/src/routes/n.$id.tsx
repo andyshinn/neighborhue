@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { ColorField } from '../components/ColorField'
+import { ShareColorField } from '../components/ShareColorField'
 import { NeighborhoodNotFound } from '../lib/errors'
 import { neighborhoodQueryOptions } from '../lib/queries'
 
@@ -37,5 +37,7 @@ export const Route = createFileRoute('/n/$id')({
 function NeighborhoodShare() {
   const { id } = Route.useParams()
   const { data } = useSuspenseQuery(neighborhoodQueryOptions(id))
-  return <ColorField name={data.name} color={data.color} />
+  // paletteName: "" is a temporary bridge (Task 9 resolves and passes the
+  // real palette name once the full two-panel layout is wired up).
+  return <ShareColorField name={data.name} color={data.color} paletteName="" />
 }
