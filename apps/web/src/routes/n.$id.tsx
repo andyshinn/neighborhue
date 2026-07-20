@@ -1,5 +1,5 @@
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound, useRouter } from '@tanstack/react-router'
 import { useCallback, useRef } from 'react'
 import { colorTheme } from '../color/theme'
 import { DetailsPanel } from '../components/DetailsPanel'
@@ -9,6 +9,7 @@ import { NeighborhoodNotFound } from '../lib/errors'
 import { resolvePalette } from '../lib/palette'
 import { neighborhoodQueryOptions, palettesQueryOptions } from '../lib/queries'
 import styles from './n.$id.module.css'
+import stateStyles from './n.$id.states.module.css'
 
 export const Route = createFileRoute('/n/$id')({
   // SSR (default): the hue paints with zero JS and OG tags unfurl.
@@ -38,6 +39,19 @@ export const Route = createFileRoute('/n/$id')({
     }
   },
   component: NeighborhoodShare,
+  notFoundComponent: () => (
+    <main className={stateStyles.state}>
+      <h1 className={stateStyles.title}>This neighborhood doesn’t exist</h1>
+      <p className={stateStyles.body}>
+        The link may be mistyped, or the neighborhood may have been deleted. You can start a new one in about a minute — no
+        account needed.
+      </p>
+      <Link to="/create" className={stateStyles.cta}>
+        Create a neighborhood
+      </Link>
+    </main>
+  ),
+  errorComponent: ({ error }) => <ShareError message={error.message} />,
 })
 
 function NeighborhoodShare() {
@@ -90,6 +104,19 @@ function NeighborhoodShare() {
         hue={data.color.hex}
         ink={theme.ink}
       />
+    </main>
+  )
+}
+
+function ShareError({ message }: { message: string }) {
+  const router = useRouter()
+  return (
+    <main className={stateStyles.state}>
+      <h1 className={stateStyles.title}>Couldn’t load today’s color</h1>
+      <p className={stateStyles.body}>{message}</p>
+      <button type="button" className={stateStyles.cta} onClick={() => router.invalidate()}>
+        Try again
+      </button>
     </main>
   )
 }
