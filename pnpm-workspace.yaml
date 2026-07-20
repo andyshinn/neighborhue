@@ -21,3 +21,7 @@ minimumReleaseAgeExclude:
   - '@tanstack/start-plugin-core@1.171.22'
   - miniflare@4.20260714.0
   - wrangler@4.112.0
+  - '@radix-ui/primitive@1.1.6'
+  - '@radix-ui/react-collapsible@1.1.17'
+  - '@radix-ui/react-presence@1.1.8'
+  - '@radix-ui/react-use-controllable-state@1.2.4'
