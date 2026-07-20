@@ -66,9 +66,9 @@ function NeighborhoodShare() {
   // Rotation rollover (spec S8): refetch after a grace period so the new color
   // arrives, backing off if the server hasn't rolled over yet (client clock
   // ahead). The backoff resets when a new day's color lands (next_rotation_at
-  // changes) — compared during render, the idiomatic way to reset on a data
-  // change — so each rotation gets a fresh 2s-start backoff even on a page left
-  // open for days on a wall display.
+  // changes) — compared during render, which is safe for a ref here because the
+  // reset is idempotent and doesn't drive a re-render — so each rotation gets a
+  // fresh 2s-start backoff even on a page left open for days on a wall display.
   const attempts = useRef(0)
   const lastRotation = useRef(data.next_rotation_at)
   if (lastRotation.current !== data.next_rotation_at) {
@@ -76,12 +76,25 @@ function NeighborhoodShare() {
     attempts.current = 0
   }
 
+  // useCountdown fires this once when the clock hits zero; from here the route
+  // owns the retry loop. Refetch after a backoff, and if the server hasn't
+  // rolled over yet — its next_rotation_at is still in the past because the
+  // client clock ran ahead — back off further and try again. Once the new
+  // color lands, next_rotation_at moves into the future, the loop stops, and
+  // the render-time reset above zeroes the backoff for the next rotation.
   const onExpire = useCallback(() => {
-    const delay = 2000 * 2 ** Math.min(attempts.current, 3) // 2s, 4s, 8s, 16s
-    attempts.current += 1
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['neighborhood', id] })
-    }, delay)
+    const key = neighborhoodQueryOptions(id).queryKey
+    const retry = async () => {
+      const delay = 2000 * 2 ** Math.min(attempts.current, 3) // 2s, 4s, 8s, 16s (capped)
+      attempts.current += 1
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      await queryClient.invalidateQueries({ queryKey: key })
+      const fresh = queryClient.getQueryData(key)
+      if (fresh && Date.parse(fresh.next_rotation_at) <= Date.now()) {
+        void retry() // still on the old color — keep trying with a longer delay
+      }
+    }
+    void retry()
   }, [queryClient, id])
 
   const seconds = useCountdown(data.seconds_until_rotation, data.next_rotation_at, onExpire)
