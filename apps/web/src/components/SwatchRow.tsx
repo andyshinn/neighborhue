@@ -13,10 +13,11 @@ export function SwatchRow({ colors }: SwatchRowProps) {
     <div className={styles.row} role="img" aria-label={`${colors.length} palette colors`}>
       {colors.map((c) => (
         <span
-          key={`${c.hex}-${c.name}`}
+          key={`${c.hex}-${c.name ?? ''}`}
           className={styles.swatch}
           style={{ background: c.hex }}
-          title={`${c.name} ${c.hex}`}
+          // Palette color names are nullable in the schema; fall back to the hex.
+          title={c.name ? `${c.name} ${c.hex}` : c.hex}
         />
       ))}
     </div>

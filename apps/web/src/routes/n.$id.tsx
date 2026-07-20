@@ -1,6 +1,6 @@
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { colorTheme } from '../color/theme'
 import { DetailsPanel } from '../components/DetailsPanel'
 import { ShareColorField } from '../components/ShareColorField'
@@ -51,11 +51,16 @@ function NeighborhoodShare() {
 
   // Rotation rollover (spec S8): refetch after a grace period so the new color
   // arrives, backing off if the server hasn't rolled over yet (client clock
-  // ahead). Attempts reset whenever a new day's color actually lands.
+  // ahead). The backoff resets when a new day's color lands (next_rotation_at
+  // changes) — compared during render, the idiomatic way to reset on a data
+  // change — so each rotation gets a fresh 2s-start backoff even on a page left
+  // open for days on a wall display.
   const attempts = useRef(0)
-  useEffect(() => {
+  const lastRotation = useRef(data.next_rotation_at)
+  if (lastRotation.current !== data.next_rotation_at) {
+    lastRotation.current = data.next_rotation_at
     attempts.current = 0
-  }, [])
+  }
 
   const onExpire = useCallback(() => {
     const delay = 2000 * 2 ** Math.min(attempts.current, 3) // 2s, 4s, 8s, 16s
