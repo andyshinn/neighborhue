@@ -1,0 +1,60 @@
+.panel {
+  flex: 1 1 44%; /* handoff §3 */
+  background: var(--surface-2);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 32px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.neighborhood {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.auto {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 5px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--hairline);
+  color: var(--text-faint);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+}
+
+.hairline {
+  height: 1px;
+  background: var(--hairline);
+  border: 0;
+  margin: 4px 0;
+}
+
+.paletteName {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
