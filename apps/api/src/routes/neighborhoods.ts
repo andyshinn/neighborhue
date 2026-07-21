@@ -18,7 +18,7 @@ import { newAdminSecret, newNeighborhoodId } from '../lib/ids'
 import { pickColorIndex } from '../lib/pick'
 import { rotation } from '../lib/rotation'
 import { requireAdminSecret } from '../middleware/auth'
-import type { AppEnv, PublicNeighborhood } from '../types'
+import type { AppEnv, CreatedNeighborhood, PublicNeighborhood } from '../types'
 import { createSchema, patchSchema, zJson } from '../validators'
 
 // Resolves the ordered color list and derives today's color for a neighborhood.
@@ -120,12 +120,19 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
 
     const id = newNeighborhoodId()
     const adminSecret = newAdminSecret()
+    // Resolved once and reused below: `NeighborhoodInsert` (Drizzle's $inferInsert)
+    // widens `name`/`timezone`/`rotationHour` to include `undefined` because
+    // those columns have DB-side defaults, so reading them back off `row` loses
+    // the narrower type these locals carry. Values are identical either way.
+    const name = body.name ?? null
+    const timezone = body.timezone ?? 'UTC'
+    const rotationHour = body.rotation_hour ?? 7
     const row: NeighborhoodInsert = {
       id,
       adminSecret,
-      name: body.name ?? null,
-      timezone: body.timezone ?? 'UTC',
-      rotationHour: body.rotation_hour ?? 7,
+      name,
+      timezone,
+      rotationHour,
       paletteId,
       customColors: null,
       createdAt: Math.floor(Date.now() / 1000),
@@ -137,12 +144,12 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
         id,
         admin_secret: adminSecret,
         manage_url: `${c.env.MANAGE_URL_BASE}/manage/${id}#${adminSecret}`,
-        name: row.name,
-        timezone: row.timezone,
-        rotation_hour: row.rotationHour,
+        name,
+        timezone,
+        rotation_hour: rotationHour,
         palette: body.palette ?? null,
         custom_colors: null,
-      },
+      } satisfies CreatedNeighborhood,
       201,
     )
   })

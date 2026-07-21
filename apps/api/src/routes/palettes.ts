@@ -12,6 +12,7 @@ export const palettesRoute = new Hono<AppEnv>().get('/', async (c) => {
       slug: p.slug,
       name: p.name,
       description: p.description,
+      is_default: p.isDefault,
       colors: (await getPaletteColors(db, p.id)).map((col) => ({ hex: col.hex, name: col.name })),
     })),
   )

@@ -18,4 +18,12 @@ describe('GET /v1/palettes', () => {
     const rainbow = body.palettes.find((p) => p.slug === 'rainbow')
     expect(rainbow?.colors.length).toBe(7)
   })
+
+  it('marks exactly one palette as the default (rainbow)', async () => {
+    const res = await SELF.fetch('https://x/v1/palettes')
+    const body = (await res.json()) as { palettes: Array<{ slug: string; is_default: boolean }> }
+    const defaults = body.palettes.filter((p) => p.is_default)
+    expect(defaults.length).toBe(1)
+    expect(defaults[0].slug).toBe('rainbow')
+  })
 })

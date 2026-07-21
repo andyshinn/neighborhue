@@ -34,3 +34,18 @@ export interface PublicNeighborhood {
   palette: string | null
   day_index: number
 }
+
+// Shape returned by POST /v1/neighborhoods (201). Carries the one-time
+// admin_secret and the assembled manage_url, which the public read never
+// exposes. Exported so apps/web imports (not restates) it — a field rename
+// here then fails apps/web typecheck, keeping the compile-time seam.
+export interface CreatedNeighborhood {
+  id: string
+  admin_secret: string
+  manage_url: string
+  name: string | null
+  timezone: string
+  rotation_hour: number
+  palette: string | null
+  custom_colors: null
+}
