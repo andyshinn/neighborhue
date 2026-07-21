@@ -70,7 +70,13 @@ export function CreateView({ palettes, initialTimezone, onCreate, pending, error
             {created ? (
               <CreateSuccess created={created} />
             ) : (
-              <div className={styles.formCard}>
+              <form
+                className={styles.formCard}
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  submit()
+                }}
+              >
                 <div className={styles.field}>
                   <label htmlFor={nameId} className={styles.label}>
                     Neighborhood name <span className={styles.optional}>optional</span>
@@ -98,13 +104,17 @@ export function CreateView({ palettes, initialTimezone, onCreate, pending, error
                   <PalettePicker palettes={palettes} selectedSlug={paletteSlug} onSelect={setPaletteSlug} />
                 </div>
 
-                {error && <p className={styles.error}>{error}</p>}
+                {error && (
+                  <p className={styles.error} role="alert">
+                    {error}
+                  </p>
+                )}
 
-                <button type="button" className={styles.submit} disabled={pending || !tzValid} onClick={submit}>
+                <button type="submit" className={styles.submit} disabled={pending || !tzValid}>
                   {pending ? 'Creating…' : 'Create neighborhood'}
                   {!pending && <ArrowRightIcon aria-hidden />}
                 </button>
-              </div>
+              </form>
             )}
           </div>
 

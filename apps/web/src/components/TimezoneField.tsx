@@ -11,6 +11,7 @@ interface TimezoneFieldProps {
 
 export function TimezoneField({ value, onChange, detectedZone }: TimezoneFieldProps) {
   const id = useId()
+  const hintId = `${id}-hint`
   const valid = validateTimezone(value)
   const hint = !valid
     ? 'Use an IANA zone like America/New_York.'
@@ -31,9 +32,11 @@ export function TimezoneField({ value, onChange, detectedZone }: TimezoneFieldPr
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"
+        aria-invalid={!valid}
+        aria-describedby={hintId}
         onChange={(e) => onChange(e.target.value)}
       />
-      <p className={valid ? styles.hintOk : styles.hintBad}>
+      <p id={hintId} aria-live="polite" className={valid ? styles.hintOk : styles.hintBad}>
         {valid ? <CheckIcon aria-hidden /> : <Cross2Icon aria-hidden />}
         <span>{hint}</span>
       </p>
