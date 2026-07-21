@@ -1,0 +1,166 @@
+.page {
+  min-height: 100vh;
+  background: var(--page-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 30px;
+}
+
+.logo {
+  display: block;
+  width: 170px;
+  height: 44px;
+  background: url("/lockup-dark-text.png") left center / contain no-repeat;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    background-image: url("/lockup-light.png");
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 8px 30px 120px;
+}
+
+.h1 {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.subhead {
+  margin-top: 10px;
+  max-width: 600px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 30px;
+}
+
+.left {
+  flex: 1 1 440px;
+  min-width: 320px;
+}
+
+.right {
+  flex: 1 1 360px;
+  min-width: 300px;
+  position: sticky;
+  top: 24px;
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: var(--shadow-card);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.optional {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  background: var(--surface-2);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.input {
+  width: 100%;
+  height: 46px;
+  border-radius: 11px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  padding: 0 14px;
+  font-size: 14.5px;
+}
+
+.help {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.error {
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--cta-bg);
+  color: var(--cta-fg);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.previewEyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+}
+
+.previewCaption {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+}
