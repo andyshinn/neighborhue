@@ -7,6 +7,7 @@ export interface PaletteSummary {
   slug: string
   name: string
   description: string | null
+  is_default: boolean
   colors: PaletteColor[]
 }
 

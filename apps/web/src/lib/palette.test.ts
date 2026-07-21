@@ -6,6 +6,7 @@ const palettes: PaletteSummary[] = [
     slug: 'rainbow',
     name: 'Rainbow Colors',
     description: 'The classic seven-color rainbow.',
+    is_default: true,
     colors: [
       { hex: '#FF0000', name: 'Red' },
       { hex: '#0080FF', name: 'Blue' },
