@@ -29,7 +29,7 @@ It also delivers the first **`ShareCard`** — the compact preview card the hand
 | C5 | Success-state persistence | **In-memory only; the secret is shown once, never persisted or re-sent** | The management link is a bearer credential (foundation constraint). Storing it in `sessionStorage` is gratuitous risk; the fragment-based secret must not reach a server log. A refresh losing the success card is correct "shown once" behavior — the warning tells the user to save it. |
 | C6 | Result links | **Public `/n/{id}`, manage from the API's `manage_url`; no slugs** | The API issues UUID ids and returns `manage_url = {base}/manage/{id}#{secret}`. The handoff's `/n/maple-grove` slugs are placeholders; slugs remain deferred (2a §9). |
 | C7 | Timezone validation | **Validate against `Intl.supportedValuesOf('timeZone')`; invalid blocks submit** | The API validates via luxon and 400s on a bad zone, so blocking client-side avoids a guaranteed round-trip. Hints mirror the handoff: valid+unchanged → *"Detected from your device."*; valid+edited → *"Looks good."*; invalid → *"Use an IANA zone like America/New_York."* |
-| C8 | Palette picker source + default | **Drive from the live `GET /v1/palettes`; preselect the first curated; append a synthetic "Custom colors" row** | The picker must show real palette names/colors (the same data 2a's `resolvePalette` uses), not the handoff's starter hexes. The endpoint carries no `is_default` flag, so preselecting the first returned palette is data-driven and avoids hardcoding a slug. |
+| C8 | Palette picker source + default | **Drive from the live `GET /v1/palettes`; add an `is_default` flag to that response and preselect the palette it marks; append a synthetic "Custom colors" row** | The picker must show real palette names/colors (the same data 2a's `resolvePalette` uses), not the handoff's starter hexes. The endpoint currently exposes no default, and `listActivePalettes` sorts by slug — so "preselect the first returned" would arbitrarily land on *Cool*, not the intended *Rainbow*. The DB already has the `is_default` column (`rainbow` = default); surfacing it makes the preselect fully data-driven with no hardcoded slug (fall back to the first palette if none is flagged). |
 | C9 | Create response type | **Add `CreatedNeighborhood` to `apps/api/src/types.ts`, `satisfies` it in the handler, import it type-only in web** | The create response carries `admin_secret` + `manage_url`, absent from `PublicNeighborhood`. Naming and importing the type (rather than restating it) preserves the compile-time seam — the identical move 2a used for `PublicNeighborhood`/`manage_url`. |
 | C10 | `ShareCard` | **New, purely presentational; its swatch row is interactive only when an `onPreviewColor` prop is passed** | First consumer is this preview; 2c/2d reuse it with a *real* fixed color and no interactivity. Keeping data and cycle state in the route (components receive plain values) matches 2a's "route is the only data-toucher" rule. |
 | C11 | Reduced motion | **Disables the auto-cycle (static first color); hover/focus still drives the preview** | The cycle is decorative motion — honor `prefers-reduced-motion` — but exploration by pointer/keyboard is interaction, not animation, and stays. |
@@ -82,7 +82,7 @@ Reused as-is from 2a: `CopyButton`, `colorTheme`, `PaletteColor`/`PaletteSummary
 
 ### 5.1 Form + palettes
 
-`ssr:false` (C12). On mount the route seeds `timezone` from `Intl.DateTimeFormat().resolvedOptions().timeZone`; `rotationHour` defaults to 7; `paletteSlug` defaults to the first curated palette. A client-side loader `ensureQueryData(palettesQueryOptions())` primes the picker, read via `useSuspenseQuery`.
+`ssr:false` (C12). On mount the route seeds `timezone` from `Intl.DateTimeFormat().resolvedOptions().timeZone`; `rotationHour` defaults to 7; `paletteSlug` defaults to the palette the endpoint marks `is_default` (falling back to the first if none). A client-side loader `ensureQueryData(palettesQueryOptions())` primes the picker, read via `useSuspenseQuery`.
 
 ### 5.2 The preview (C1, C11)
 
@@ -145,6 +145,7 @@ Matches 2a: Vitest + Testing Library, unit-focused, `vi.mock` for Router `Link`,
 ## 8. Changes outside the Create route
 
 - `apps/api/src/types.ts` gains `CreatedNeighborhood`; `apps/api/src/routes/neighborhoods.ts` POST handler gains `satisfies CreatedNeighborhood` (C9). No behavior change, no new endpoint.
+- `apps/api/src/routes/palettes.ts` adds `is_default` to each palette in the response (C8); `apps/web/src/lib/palette.ts` `PaletteSummary` gains the matching `is_default: boolean`.
 - `apps/web/src/lib/neighborhood.ts` gains `createNeighborhood`.
 - New web components/libs per §4. No changes to the Share route or foundation tokens.
 
