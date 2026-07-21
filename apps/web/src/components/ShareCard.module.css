@@ -1,0 +1,113 @@
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+}
+
+.colorPanel,
+.customPanel {
+  flex: 1 1 200px;
+  min-height: 260px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition:
+    background 0.5s ease,
+    color 0.5s ease;
+}
+
+.customPanel {
+  background: var(--surface-2);
+  color: var(--text);
+  gap: 8px;
+  justify-content: center;
+}
+
+.customText {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.customSub {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.colorTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hexChip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 7px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  opacity: 0.85;
+}
+
+.colorName {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-top: 6px;
+}
+
+.infoPanel {
+  flex: 1 1 180px;
+  background: var(--surface);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.paletteName {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.swatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.swatch {
+  width: 15px;
+  height: 24px;
+  border-radius: 5px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.swatch[data-active] {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
+
+.rotates {
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
