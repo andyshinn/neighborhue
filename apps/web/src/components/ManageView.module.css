@@ -1,0 +1,203 @@
+.page {
+  min-height: 100vh;
+  background: var(--page-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 30px;
+}
+
+.logo {
+  display: block;
+  width: 170px;
+  height: 44px;
+  background: url("/lockup-dark-text.png") left center / contain no-repeat;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    background-image: url("/lockup-light.png");
+  }
+}
+
+.viewPublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 8px 30px 120px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.h1 {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.secretChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--warning);
+  background: var(--warning-tint);
+  color: var(--warning);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  margin-top: 28px;
+}
+
+.left {
+  flex: 1 1 460px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right {
+  flex: 1 1 360px;
+  min-width: 300px;
+  position: sticky;
+  top: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: var(--shadow-card);
+}
+
+.cardHeading {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+/* Reset the browser's default fieldset chrome — this element exists only to
+   catch onBlur when focus leaves the timezone input, not to draw a group box. */
+.tzGroup {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  border-radius: 11px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 12px;
+}
+
+.url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  padding: 10px 12px;
+}
+
+.dangerCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-radius: 18px;
+  padding: 22px 26px;
+}
+
+.dangerHeading {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.dangerBody {
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.previewEyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+}
