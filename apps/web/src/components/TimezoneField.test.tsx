@@ -25,4 +25,15 @@ describe('TimezoneField', () => {
     await userEvent.type(screen.getByLabelText('Time zone'), 'U')
     expect(onChange).toHaveBeenCalledWith('U')
   })
+
+  it('hides the valid-state hint when hideValidHint is set', () => {
+    render(<TimezoneField value="America/New_York" detectedZone="America/New_York" onChange={() => {}} hideValidHint />)
+    expect(screen.queryByText('Detected from your device.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Looks good.')).not.toBeInTheDocument()
+  })
+
+  it('still shows the invalid hint when hideValidHint is set', () => {
+    render(<TimezoneField value="Mars/Base" detectedZone="America/New_York" onChange={() => {}} hideValidHint />)
+    expect(screen.getByText('Use an IANA zone like America/New_York.')).toBeInTheDocument()
+  })
 })

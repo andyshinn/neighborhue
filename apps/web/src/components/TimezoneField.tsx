@@ -7,17 +7,21 @@ interface TimezoneFieldProps {
   value: string
   onChange: (value: string) => void
   detectedZone: string
+  // Manage (spec M10) shows only the invalid message — no "Detected"/"Looks good".
+  hideValidHint?: boolean
 }
 
-export function TimezoneField({ value, onChange, detectedZone }: TimezoneFieldProps) {
+export function TimezoneField({ value, onChange, detectedZone, hideValidHint = false }: TimezoneFieldProps) {
   const id = useId()
   const hintId = `${id}-hint`
   const valid = validateTimezone(value)
   const hint = !valid
     ? 'Use an IANA zone like America/New_York.'
-    : value === detectedZone
-      ? 'Detected from your device.'
-      : 'Looks good.'
+    : hideValidHint
+      ? null
+      : value === detectedZone
+        ? 'Detected from your device.'
+        : 'Looks good.'
 
   return (
     <div className={styles.field}>
@@ -33,13 +37,15 @@ export function TimezoneField({ value, onChange, detectedZone }: TimezoneFieldPr
         autoCapitalize="off"
         autoCorrect="off"
         aria-invalid={!valid}
-        aria-describedby={hintId}
+        aria-describedby={hint ? hintId : undefined}
         onChange={(e) => onChange(e.target.value)}
       />
-      <p id={hintId} aria-live="polite" className={valid ? styles.hintOk : styles.hintBad}>
-        {valid ? <CheckIcon aria-hidden /> : <Cross2Icon aria-hidden />}
-        <span>{hint}</span>
-      </p>
+      {hint && (
+        <p id={hintId} aria-live="polite" className={valid ? styles.hintOk : styles.hintBad}>
+          {valid ? <CheckIcon aria-hidden /> : <Cross2Icon aria-hidden />}
+          <span>{hint}</span>
+        </p>
+      )}
     </div>
   )
 }
