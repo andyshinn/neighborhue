@@ -23,4 +23,22 @@ describe('DeleteDialog', () => {
     expect(onConfirm).not.toHaveBeenCalled()
     expect(screen.queryByText('Delete Maple Street?')).not.toBeInTheDocument()
   })
+
+  it('disables the confirm button while deleting', async () => {
+    const onConfirm = vi.fn()
+    render(<DeleteDialog name="Maple Street" status="deleting" onConfirm={onConfirm} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    const confirm = screen.getByRole('button', { name: 'Delete neighborhood permanently' })
+    expect(confirm).toBeDisabled()
+    expect(confirm).toHaveTextContent('Deleting…')
+  })
+
+  it('shows the error inside the dialog and keeps it open', async () => {
+    const onConfirm = vi.fn()
+    render(<DeleteDialog name="Maple Street" status="error" onConfirm={onConfirm} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(screen.getByText(/Couldn.t delete/)).toBeInTheDocument()
+    // the dialog is still open
+    expect(screen.getByText('Delete Maple Street?')).toBeInTheDocument()
+  })
 })
