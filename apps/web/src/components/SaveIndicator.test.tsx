@@ -4,9 +4,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { SaveIndicator } from './SaveIndicator'
 
 describe('SaveIndicator', () => {
-  it('renders nothing when idle', () => {
+  it('renders no status text when idle, but keeps the live region mounted', () => {
     const { container } = render(<SaveIndicator status="idle" />)
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.queryByText(/Saving|Saved|Couldn't save/i)).not.toBeInTheDocument()
+    // The live region must stay in the DOM so the first save is announced.
+    expect(container.querySelector('[aria-live="polite"]')).toBeInTheDocument()
   })
 
   it('shows Saving and Saved', () => {

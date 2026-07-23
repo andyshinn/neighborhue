@@ -7,8 +7,6 @@ interface SaveIndicatorProps {
 }
 
 export function SaveIndicator({ status, onRetry }: SaveIndicatorProps) {
-  if (status === 'idle') return null
-
   return (
     <span className={styles.wrap} aria-live="polite">
       {status === 'saving' && <span className={styles.muted}>Saving…</span>}
