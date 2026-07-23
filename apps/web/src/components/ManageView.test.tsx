@@ -92,6 +92,8 @@ describe('ManageView', () => {
   it('opens Custom mode and saves the first added color with palette cleared', async () => {
     const { onSave } = setup()
     await userEvent.click(screen.getByRole('button', { name: /Custom colors/ }))
+    // M2: selecting Custom with an empty list is transient — it must not save yet.
+    expect(onSave).not.toHaveBeenCalled()
     await userEvent.type(screen.getByPlaceholderText('#FF6A00'), '#00FF00')
     await userEvent.click(screen.getByRole('button', { name: 'Add' }))
     expect(onSave).toHaveBeenCalledWith({ palette: null, custom_colors: [{ hex: '#00FF00', name: 'Custom' }] })
