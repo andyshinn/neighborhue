@@ -139,4 +139,16 @@ describe('GET/PATCH/DELETE management', () => {
     const read = await SELF.fetch(`https://x/v1/neighborhoods/${nb.id}`)
     expect(read.status).toBe(404)
   })
+
+  it('round-trips custom_colors as an array of {hex,name}', async () => {
+    const nb = await fresh()
+    const patched = await SELF.fetch(`https://x/v1/neighborhoods/${nb.id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${nb.admin_secret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ custom_colors: [{ hex: '#FF6A00', name: 'Tangerine' }] }),
+    })
+    expect(patched.status).toBe(200)
+    const cfg = (await patched.json()) as { custom_colors: Array<{ hex: string; name?: string }> | null }
+    expect(cfg.custom_colors).toEqual([{ hex: '#FF6A00', name: 'Tangerine' }])
+  })
 })

@@ -18,7 +18,7 @@ import { newAdminSecret, newNeighborhoodId } from '../lib/ids'
 import { pickColorIndex } from '../lib/pick'
 import { rotation } from '../lib/rotation'
 import { requireAdminSecret } from '../middleware/auth'
-import type { AppEnv, CreatedNeighborhood, PublicNeighborhood } from '../types'
+import type { AppEnv, CreatedNeighborhood, ManageConfig, PublicNeighborhood } from '../types'
 import { createSchema, patchSchema, zJson } from '../validators'
 
 // Resolves the ordered color list and derives today's color for a neighborhood.
@@ -64,8 +64,8 @@ async function serializeConfig(db: ReturnType<typeof getDb>, nb: NeighborhoodRow
     timezone: nb.timezone,
     rotation_hour: nb.rotationHour,
     palette: paletteSlug,
-    custom_colors: nb.customColors ? (JSON.parse(nb.customColors) as unknown) : null,
-  }
+    custom_colors: nb.customColors ? (JSON.parse(nb.customColors) as Array<{ hex: string; name?: string }>) : null,
+  } satisfies ManageConfig
 }
 
 export const neighborhoodsRoute = new Hono<AppEnv>()

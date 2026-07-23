@@ -49,3 +49,15 @@ export interface CreatedNeighborhood {
   palette: string | null
   custom_colors: null
 }
+
+// Shape returned by GET /v1/neighborhoods/:id/manage and PATCH /v1/neighborhoods/:id
+// (serializeConfig). Exported so apps/web imports (not restates) it — the same
+// compile-time seam as PublicNeighborhood / CreatedNeighborhood.
+export interface ManageConfig {
+  id: string
+  name: string | null
+  timezone: string
+  rotation_hour: number
+  palette: string | null
+  custom_colors: Array<{ hex: string; name?: string }> | null
+}
