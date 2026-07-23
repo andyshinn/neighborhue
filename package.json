@@ -4,7 +4,7 @@
   "private": true,
   "description": "A neighborhood shares one color a day",
   "type": "module",
-  "packageManager": "pnpm@11.13.0",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "dev": "pnpm -F @neighborhue/api dev",
     "deploy": "pnpm -F @neighborhue/api deploy",
