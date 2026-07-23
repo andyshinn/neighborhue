@@ -70,6 +70,10 @@ export function ManageView({
   function commitCustom(next: CustomColor[]) {
     setCustom(next)
     if (next.length === 0) {
+      // The server falls back to the default palette when custom_colors clears —
+      // mirror that locally so the preview doesn't keep claiming "Custom colors".
+      setCustomMode(false)
+      setPaletteSlug(defaultSlug)
       onSave({ custom_colors: null })
     } else {
       setPaletteSlug(null)
@@ -147,7 +151,7 @@ export function ManageView({
 
             <section className={styles.card}>
               <h2 className={styles.cardHeading}>Palette</h2>
-              <PalettePicker palettes={palettes} selectedSlug={selectedSlug} onSelect={pickPalette} />
+              <PalettePicker palettes={palettes} selectedSlug={selectedSlug} onSelect={pickPalette} customNote={null} />
               {customMode && <CustomColorsEditor colors={custom} onChange={commitCustom} />}
             </section>
 

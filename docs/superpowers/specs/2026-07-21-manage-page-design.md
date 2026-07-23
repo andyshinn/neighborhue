@@ -155,6 +155,6 @@ Vitest + Testing Library, matching prior specs (`vi.mock` Router `Link`; the Bea
 
 - **`custom_colors` and the public read.** Custom-color neighborhoods still show no swatch row on the *public* Share page (2a S3) — the public read exposes neither palette colors nor custom colors. Manage is unaffected (it has the config), but closing S3 would also let the Share page render custom swatches.
 - **Blueprint button** still waits on a published HACS component + real blueprint URL (2a S2).
-- **Rapid discrete saves** (e.g. holding the hour stepper) fire one PATCH per click; last-write-wins is acceptable, and TanStack Query serializes them. Debouncing is a possible refinement, not built (YAGNI).
+- **Rapid discrete saves are serialized explicitly.** TanStack Query runs mutations in parallel unless they share a mutation `scope`, so the save mutation sets `scope: { id: 'manage-{id}' }` to queue same-neighborhood writes in order. An unretried failure keeps the error indicator visible even if a later save succeeds, so a lost write can't be masked by a subsequent "Saved".
 - **The amber `--warning` (`amber-11`) vs handoff `#b7791f`** divergence recurs on the "Secret link" chip; still awaits design-owner sign-off.
 - **The handoff bundle remains gitignored** — 2c/2d depend on it.

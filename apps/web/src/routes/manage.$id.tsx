@@ -38,8 +38,11 @@ function ManagePage() {
   const publicQuery = useQuery(neighborhoodQueryOptions(id))
   const palettesQuery = useQuery(palettesQueryOptions())
 
+  const [failedPatch, setFailedPatch] = useState<ManagePatch | null>(null)
+
   const save = useMutation({
     mutationFn: (patch: ManagePatch) => patchNeighborhood(API_URL, id, secret, patch),
+    scope: { id: `manage-${id}` },
     onSuccess: (updated, patch) => {
       queryClient.setQueryData(manageConfigQueryOptions(id, secret).queryKey, updated)
       // A palette/custom change alters the server-computed color — refetch the public read (M6).
@@ -47,6 +50,7 @@ function ManagePage() {
         void queryClient.invalidateQueries({ queryKey: neighborhoodQueryOptions(id).queryKey })
       }
     },
+    onError: (_err, patch) => setFailedPatch(patch),
   })
 
   const del = useMutation({
@@ -71,13 +75,6 @@ function ManagePage() {
       />
     )
   }
-  if (configQuery.isPending || publicQuery.isPending || palettesQuery.isPending) {
-    return (
-      <main className={stateStyles.state}>
-        <p className={stateStyles.body}>Loading…</p>
-      </main>
-    )
-  }
   if (configQuery.error) {
     const kind = classifyManageError(configQuery.error)
     if (kind === 'not-found')
@@ -97,11 +94,18 @@ function ManagePage() {
       )
     return <StateMessage title="Couldn’t load this neighborhood" body={configQuery.error.message} />
   }
+  if (configQuery.isPending || publicQuery.isPending || palettesQuery.isPending) {
+    return (
+      <main className={stateStyles.state}>
+        <p className={stateStyles.body}>Loading…</p>
+      </main>
+    )
+  }
   if (publicQuery.error || palettesQuery.error || !configQuery.data || !publicQuery.data || !palettesQuery.data) {
     return <StateMessage title="Couldn’t load this neighborhood" body="Please try again." />
   }
 
-  const saveStatus = save.isPending ? 'saving' : save.isError ? 'error' : save.isSuccess ? 'saved' : 'idle'
+  const saveStatus = failedPatch !== null ? 'error' : save.isPending ? 'saving' : save.isSuccess ? 'saved' : 'idle'
   const deleteStatus = del.isPending ? 'deleting' : del.isError ? 'error' : 'idle'
 
   return (
@@ -112,7 +116,9 @@ function ManagePage() {
       palettes={palettesQuery.data}
       onSave={(patch) => save.mutate(patch)}
       saveStatus={saveStatus}
-      onRetrySave={() => save.variables !== undefined && save.mutate(save.variables)}
+      onRetrySave={() => {
+        if (failedPatch) save.mutate(failedPatch, { onSuccess: () => setFailedPatch(null) })
+      }}
       onDelete={() => del.mutate()}
       deleteStatus={deleteStatus}
     />

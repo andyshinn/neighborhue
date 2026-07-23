@@ -16,19 +16,22 @@ const config: ManageConfig = {
 }
 
 function stub(method: '$get' | '$patch' | '$delete', response: unknown) {
+  const fn = vi.fn().mockResolvedValue(response)
   vi.mocked(createClient).mockReturnValue({
     v1: {
       neighborhoods: {
-        ':id': { manage: { $get: vi.fn().mockResolvedValue(response) }, [method]: vi.fn().mockResolvedValue(response) },
+        ':id': { manage: { $get: method === '$get' ? fn : vi.fn().mockResolvedValue(response) }, [method]: fn },
       },
     },
   } as unknown as ReturnType<typeof createClient>)
+  return fn
 }
 
 describe('manage client', () => {
   it('fetchManageConfig returns the config on success', async () => {
-    stub('$get', { ok: true, json: async () => config })
+    const fn = stub('$get', { ok: true, json: async () => config })
     await expect(fetchManageConfig('https://api', 'abc', 'nh_sk_x')).resolves.toEqual(config)
+    expect(fn).toHaveBeenCalledWith({ param: { id: 'abc' } }, { headers: { Authorization: 'Bearer nh_sk_x' } })
   })
 
   it('fetchManageConfig throws NeighborhoodNotFound on 404', async () => {
@@ -46,10 +49,14 @@ describe('manage client', () => {
   })
 
   it('patchNeighborhood returns the updated config', async () => {
-    stub('$patch', { ok: true, json: async () => ({ ...config, name: 'Renamed' }) })
+    const fn = stub('$patch', { ok: true, json: async () => ({ ...config, name: 'Renamed' }) })
     await expect(patchNeighborhood('https://api', 'abc', 'nh_sk_x', { name: 'Renamed' })).resolves.toMatchObject({
       name: 'Renamed',
     })
+    expect(fn).toHaveBeenCalledWith(
+      { param: { id: 'abc' }, json: { name: 'Renamed' } },
+      { headers: { Authorization: 'Bearer nh_sk_x' } },
+    )
   })
 
   it('deleteNeighborhood resolves on 204', async () => {

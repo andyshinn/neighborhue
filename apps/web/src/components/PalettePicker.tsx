@@ -6,6 +6,8 @@ interface PalettePickerProps {
   palettes: PaletteSummary[]
   selectedSlug: string | null // null = Custom colors
   onSelect: (slug: string | null) => void
+  // Create shows a hint to finish setup in Manage; Manage passes null to suppress it (it IS Manage).
+  customNote?: string | null
 }
 
 const CUSTOM_NOTE = "Create the neighborhood first — you'll add and reorder your custom colors in Manage."
@@ -54,7 +56,7 @@ function Swatches({ colors }: { colors: PaletteColor[] }) {
   )
 }
 
-export function PalettePicker({ palettes, selectedSlug, onSelect }: PalettePickerProps) {
+export function PalettePicker({ palettes, selectedSlug, onSelect, customNote = CUSTOM_NOTE }: PalettePickerProps) {
   return (
     <div className={styles.picker}>
       {palettes.map((p) => (
@@ -80,7 +82,7 @@ export function PalettePicker({ palettes, selectedSlug, onSelect }: PalettePicke
         </span>
       </Row>
 
-      {selectedSlug === null && <p className={styles.note}>{CUSTOM_NOTE}</p>}
+      {selectedSlug === null && customNote && <p className={styles.note}>{customNote}</p>}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { BlendingModeIcon, ChevronDownIcon, ChevronUpIcon, Cross2Icon, PlusIcon } from '@radix-ui/react-icons'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { validateHex } from '../lib/hex'
 import type { CustomColor } from '../lib/manage'
 import styles from './CustomColorsEditor.module.css'
@@ -10,6 +10,7 @@ interface CustomColorsEditorProps {
 }
 
 export function CustomColorsEditor({ colors, onChange }: CustomColorsEditorProps) {
+  const errId = useId()
   const [newHex, setNewHex] = useState('')
   const [newName, setNewName] = useState('')
   const hexInvalid = newHex.trim() !== '' && !validateHex(newHex.trim())
@@ -96,6 +97,7 @@ export function CustomColorsEditor({ colors, onChange }: CustomColorsEditorProps
           placeholder="#FF6A00"
           aria-label="New color hex"
           aria-invalid={hexInvalid}
+          aria-describedby={hexInvalid ? errId : undefined}
           spellCheck={false}
           autoCapitalize="off"
           onChange={(e) => setNewHex(e.target.value)}
@@ -103,6 +105,7 @@ export function CustomColorsEditor({ colors, onChange }: CustomColorsEditorProps
         <input
           className={styles.nameInput}
           value={newName}
+          maxLength={120}
           placeholder="Color name"
           aria-label="New color name"
           onChange={(e) => setNewName(e.target.value)}
@@ -111,7 +114,11 @@ export function CustomColorsEditor({ colors, onChange }: CustomColorsEditorProps
           <PlusIcon aria-hidden /> Add
         </button>
       </div>
-      {hexInvalid && <p className={styles.error}>Enter a valid hex like #FF6A00.</p>}
+      {hexInvalid && (
+        <p id={errId} className={styles.error}>
+          Enter a valid hex like #FF6A00.
+        </p>
+      )}
     </div>
   )
 }

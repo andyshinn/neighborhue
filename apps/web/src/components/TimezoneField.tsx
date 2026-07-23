@@ -40,12 +40,14 @@ export function TimezoneField({ value, onChange, detectedZone, hideValidHint = f
         aria-describedby={hint ? hintId : undefined}
         onChange={(e) => onChange(e.target.value)}
       />
-      {hint && (
-        <p id={hintId} aria-live="polite" className={valid ? styles.hintOk : styles.hintBad}>
-          {valid ? <CheckIcon aria-hidden /> : <Cross2Icon aria-hidden />}
-          <span>{hint}</span>
-        </p>
-      )}
+      <p id={hintId} aria-live="polite" className={valid ? styles.hintOk : styles.hintBad}>
+        {hint && (
+          <>
+            {valid ? <CheckIcon aria-hidden /> : <Cross2Icon aria-hidden />}
+            <span>{hint}</span>
+          </>
+        )}
+      </p>
     </div>
   )
 }
