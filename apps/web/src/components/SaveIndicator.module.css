@@ -1,0 +1,32 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  font-size: 13px;
+}
+
+.muted {
+  color: var(--text-faint);
+}
+
+.saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--success);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.retry {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--danger);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
