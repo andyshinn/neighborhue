@@ -12,6 +12,7 @@ import styles from './CreateView.module.css'
 import { PalettePicker } from './PalettePicker'
 import { RotationHourStepper } from './RotationHourStepper'
 import { ShareCard } from './ShareCard'
+import { SiteLogo } from './SiteLogo'
 import { TimezoneField } from './TimezoneField'
 
 interface CreateViewProps {
@@ -51,9 +52,7 @@ export function CreateView({ palettes, initialTimezone, onCreate, pending, error
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        {/* Neutral-chrome logo: swap the lockup by system theme in pure CSS
-            (the ink-based Logo is only right on the colored panel). */}
-        <Link to="/" aria-label="Neighborhue home" className={styles.logo} />
+        <SiteLogo />
         <Link to="/" className={styles.back}>
           <ArrowLeftIcon aria-hidden /> Back
         </Link>

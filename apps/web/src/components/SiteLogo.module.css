@@ -1,0 +1,20 @@
+.logo {
+  display: block;
+  background: url("/lockup-dark-text.png") left center / contain no-repeat;
+}
+
+.nav {
+  width: 170px;
+  height: 44px;
+}
+
+.footer {
+  width: 131px;
+  height: 34px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo {
+    background-image: url("/lockup-light.png");
+  }
+}

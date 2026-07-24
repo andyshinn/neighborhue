@@ -12,19 +12,6 @@
   padding: 24px 30px;
 }
 
-.logo {
-  display: block;
-  width: 170px;
-  height: 44px;
-  background: url("/lockup-dark-text.png") left center / contain no-repeat;
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    background-image: url("/lockup-light.png");
-  }
-}
-
 .back {
   display: inline-flex;
   align-items: center;

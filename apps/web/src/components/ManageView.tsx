@@ -15,6 +15,7 @@ import { PalettePicker } from './PalettePicker'
 import { RotationHourStepper } from './RotationHourStepper'
 import { SaveIndicator } from './SaveIndicator'
 import { ShareCard } from './ShareCard'
+import { SiteLogo } from './SiteLogo'
 import { TimezoneField } from './TimezoneField'
 
 interface ManageViewProps {
@@ -100,7 +101,7 @@ export function ManageView({
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Link to="/" aria-label="Neighborhue home" className={styles.logo} />
+        <SiteLogo />
         <Link to="/n/$id" params={{ id }} className={styles.viewPublic}>
           <EyeOpenIcon aria-hidden /> View public page
         </Link>
