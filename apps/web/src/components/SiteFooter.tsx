@@ -17,7 +17,7 @@ export function SiteFooter() {
         <div className={styles.row}>
           <SiteLogo size="footer" asLink={false} />
           <span className={styles.tagline}>A shared color for the whole neighborhood.</span>
-          <nav className={styles.links}>
+          <nav className={styles.links} aria-label="Footer">
             <a href="#how" className={styles.link}>
               How it works
             </a>

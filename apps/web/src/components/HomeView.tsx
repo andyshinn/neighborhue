@@ -17,7 +17,7 @@ export function HomeView({ palette }: HomeViewProps) {
     <div className={styles.page}>
       {/* H2: the handoff's "Live example" button is gone — there is no example
           neighborhood, so it could only point at /create. */}
-      <nav className={styles.nav}>
+      <nav className={styles.nav} aria-label="Main">
         <SiteLogo />
         <Link to="/create" className={styles.create}>
           <PlusIcon aria-hidden /> Create

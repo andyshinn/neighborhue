@@ -66,8 +66,19 @@ describe('HomeHero', () => {
 
   it('falls back to the first color when the resting hex is absent', () => {
     stubReducedMotion(true)
-    render(<HomeHero palette={{ name: 'Warm', colors: [{ hex: '#FF3B30', name: 'Scarlet' }] }} />)
+    render(
+      <HomeHero
+        palette={{
+          name: 'Warm',
+          colors: [
+            { hex: '#FF3B30', name: 'Scarlet' },
+            { hex: '#12A150', name: 'Fern' },
+          ],
+        }}
+      />,
+    )
     expect(screen.getByText('Scarlet')).toBeInTheDocument()
+    expect(screen.queryByText('Fern')).not.toBeInTheDocument()
   })
 
   // Use userEvent.hover, not a raw MouseEvent: React synthesizes onMouseEnter

@@ -13,7 +13,7 @@ export default defineConfig({
     // processing; every other .module.css import in the suite keeps using
     // Vitest's default class-name-proxy stub (untouched by this include).
     css: {
-      include: [/tokens\.css/],
+      include: [/src\/styles\/tokens\.css(\?.*)?$/],
     },
   },
 })
