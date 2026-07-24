@@ -197,7 +197,7 @@ At deploy: verify the raw SSR HTML contains the H1 and section copy (writing byt
 **How it works** — eyebrow "How it works"
 1. "Pick a palette" — "Seven vivid palettes tuned for cheap RGB bulbs — or define your own custom colors." *(Seven is verified against the live API: 7 curated palettes, default `rainbow`.)*
 2. "Share the link" — "Drop the public link in the group chat. Neighbors just open it — no app to install."
-3. "Point your lights" — "Home Assistant or any bulb reads today's color and glows automatically each morning."
+3. "Point your lights" — "Home Assistant reads today's color and applies it to your lights automatically each morning." *(Corrected during the final review: the handoff's "Home Assistant or any bulb reads today's color" credits the bulb with doing the reading. The "cheap bulbs work" reassurance is carried by the HA band instead.)*
 
 **Made for Home Assistant** (H6, rewritten)
 > "Every neighborhood page carries a ready-made REST sensor and automation — copy the YAML into your `configuration.yaml` and Home Assistant applies today's color each morning. Plain RGB bulbs work too."
@@ -205,7 +205,7 @@ At deploy: verify the raw SSR HTML contains the H1 and section copy (writing byt
 **Footer**
 - Tagline: "A shared color for the whole neighborhood."
 - Links: "How it works" · "Privacy" · "GitHub"
-- Privacy statement: "No accounts, no logins, no tracking or analytics. A neighborhood stores only what you enter — its name, time zone, rotation hour, and colors — and anyone with its secret link can delete it permanently."
+- Privacy statement: "No accounts, no logins, no tracking or analytics. A neighborhood stores only your name, time zone, rotation hour, and colors — and anyone with its secret link can delete it permanently." *(Corrected during the final review: the original "stores only what you enter" was over-claiming — the row also holds the `id`, the `admin_secret`, and a `created_at` timestamp. The revised wording keeps the promise and is exactly true.)*
 
 ---
 

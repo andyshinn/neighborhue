@@ -8,7 +8,7 @@ const GITHUB_URL = 'https://github.com/andyshinn/neighborhue'
 // analytics, tracking, or error-reporting SDK is installed. If one is ever
 // added, this sentence must change.
 const PRIVACY =
-  'No accounts, no logins, no tracking or analytics. A neighborhood stores only what you enter — its name, time zone, rotation hour, and colors — and anyone with its secret link can delete it permanently.'
+  'No accounts, no logins, no tracking or analytics. A neighborhood stores only your name, time zone, rotation hour, and colors — and anyone with its secret link can delete it permanently.'
 
 export function SiteFooter() {
   return (

@@ -19,7 +19,7 @@ const CARDS = [
     tone: 'amber',
     Icon: SunIcon,
     title: 'Point your lights',
-    body: "Home Assistant or any bulb reads today's color and glows automatically each morning.",
+    body: "Home Assistant reads today's color and applies it to your lights automatically each morning.",
   },
 ] as const
 
