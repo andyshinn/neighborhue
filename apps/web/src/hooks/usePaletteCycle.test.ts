@@ -49,4 +49,24 @@ describe('usePaletteCycle', () => {
     act(() => vi.advanceTimersByTime(4000))
     expect(result.current).toBe(0)
   })
+
+  it('does not advance while disabled', () => {
+    stubReducedMotion(false)
+    vi.useFakeTimers()
+    const { result } = renderHook(() => usePaletteCycle(3, 2000, false))
+    act(() => vi.advanceTimersByTime(6000))
+    expect(result.current).toBe(0)
+  })
+
+  it('advances once enabled, and resets to 0 when disabled again', () => {
+    stubReducedMotion(false)
+    vi.useFakeTimers()
+    const { result, rerender } = renderHook(({ on }: { on: boolean }) => usePaletteCycle(3, 2000, on), {
+      initialProps: { on: true },
+    })
+    act(() => vi.advanceTimersByTime(2000))
+    expect(result.current).toBe(1)
+    rerender({ on: false })
+    expect(result.current).toBe(0)
+  })
 })

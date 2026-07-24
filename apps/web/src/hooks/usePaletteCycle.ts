@@ -13,15 +13,17 @@ function prefersReducedMotion(): boolean {
 // Walks 0..length-1 on a timer so the Create preview reads as a sample reel
 // ("one of these, chosen each day"), never a fixed "today". Honors
 // prefers-reduced-motion (C11) and resets when the palette (length) changes.
-export function usePaletteCycle(length: number, intervalMs: number = DEFAULT_INTERVAL_MS): number {
+// `enabled` gates the timer for Home's hover-only cycle (2d H12); it defaults
+// to true so Create's always-on call is unchanged.
+export function usePaletteCycle(length: number, intervalMs: number = DEFAULT_INTERVAL_MS, enabled = true): number {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
     setIndex(0)
-    if (length <= 1 || prefersReducedMotion()) return
+    if (!enabled || length <= 1 || prefersReducedMotion()) return
     const id = setInterval(() => setIndex((i) => (i + 1) % length), intervalMs)
     return () => clearInterval(id)
-  }, [length, intervalMs])
+  }, [length, intervalMs, enabled])
 
   return length > 0 ? index % length : 0
 }
