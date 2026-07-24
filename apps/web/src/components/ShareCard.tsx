@@ -70,7 +70,7 @@ export function ShareCard({
               ))}
             </fieldset>
           ) : (
-            colors.length > 0 && <SwatchRow colors={colors} />
+            colors.length > 0 && <SwatchRow colors={colors} activeHex={activeHex} />
           )}
         </div>
         <p className={styles.rotates}>Rotates daily at {rotationLabel}</p>
