@@ -54,4 +54,20 @@ describe('ShareCard', () => {
     render(<ShareCard name="Maple" activeColor={null} colors={[]} paletteName="Custom colors" rotationLabel="7:00 AM" />)
     expect(screen.getByText('Your custom colors')).toBeInTheDocument()
   })
+
+  it('does not highlight a swatch when no activeHex is given (Manage preview)', () => {
+    // Forwarding highlight instead of activeHex here would silently highlight Manage's preview
+    render(
+      <ShareCard
+        name="Maple Street"
+        activeColor={colors[0]}
+        colors={colors}
+        paletteName="Rainbow Colors"
+        rotationLabel="7:00 AM"
+      />,
+    )
+    const swatchContainer = screen.getByRole('img', { name: /palette colors/ })
+    const swatches = swatchContainer.querySelectorAll('[data-active]')
+    expect(swatches).toHaveLength(0)
+  })
 })
