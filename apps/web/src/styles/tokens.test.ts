@@ -1,13 +1,11 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import tokensCss from './tokens.css?raw'
 
-const css = readFileSync(resolve(process.cwd(), './src/styles/tokens.css'), 'utf8')
-const darkBlock = css.slice(css.indexOf('@media (prefers-color-scheme: dark)'))
+const darkBlock = tokensCss.slice(tokensCss.indexOf('@media (prefers-color-scheme: dark)'))
 
 describe('tokens.css', () => {
   it('imports the pink scale used by the how-it-works tiles', () => {
-    expect(css).toContain('@import "@radix-ui/colors/pink.css";')
+    expect(tokensCss).toContain('@import "@radix-ui/colors/pink.css";')
   })
 
   it.each([

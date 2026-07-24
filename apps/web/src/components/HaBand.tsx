@@ -15,8 +15,8 @@ export function HaBand() {
         <h2 className={styles.title}>Made for Home Assistant</h2>
         <p className={styles.body}>
           Every neighborhood page carries a ready-made REST sensor and automation — copy the YAML into your{' '}
-          <code className={styles.code}>configuration.yaml</code> and Home Assistant applies today's color each
-          morning. Plain RGB bulbs work too.
+          <code className={styles.code}>configuration.yaml</code> and Home Assistant applies today's color each morning.
+          Plain RGB bulbs work too.
         </p>
       </div>
     </section>
