@@ -13,6 +13,7 @@
 @import "@radix-ui/colors/red.css";
 @import "@radix-ui/colors/green.css";
 @import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/pink.css";
 
 :root {
   color-scheme: light dark; /* native controls/scrollbars follow the theme too */
@@ -83,8 +84,12 @@
     --sand-a12: #fffffded;
 
     /* accent dark steps (used subset — see note above) */
+    --indigo-3: #182449;
     --indigo-9: #3e63dd;
     --indigo-10: #5472e4;
+    --indigo-11: #9eb1ff;
+    --pink-3: #37172f;
+    --pink-11: #ff8dcc;
     --red-3: #3b1219;
     --red-9: #e5484d;
     --green-3: #132d21;

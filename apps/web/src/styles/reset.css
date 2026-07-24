@@ -65,3 +65,10 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The Home hero's secondary CTA and the footer both scroll to #how. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

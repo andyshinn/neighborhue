@@ -1,0 +1,65 @@
+.section {
+  padding: 20px 0;
+  scroll-margin-top: 24px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  flex: 1 1 250px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+}
+
+.tile[data-tone="indigo"] {
+  background: var(--indigo-3);
+  color: var(--indigo-11);
+}
+
+.tile[data-tone="pink"] {
+  background: var(--pink-3);
+  color: var(--pink-11);
+}
+
+.tile[data-tone="amber"] {
+  background: var(--amber-3);
+  color: var(--amber-11);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
