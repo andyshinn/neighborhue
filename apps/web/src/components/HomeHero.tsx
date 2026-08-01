@@ -21,16 +21,20 @@ const CYCLE_MS = 2000
 const CHECKS = ['No accounts', 'No logins', 'About a minute to set up']
 
 export function HomeHero({ palette }: HomeHeroProps) {
-  const [hovering, setHovering] = useState(false)
+  const [hoveredHex, setHoveredHex] = useState<string | null>(null)
   const colors = palette?.colors ?? []
   const restingIndex = Math.max(
     0,
     colors.findIndex((c) => c.hex.toUpperCase() === RESTING_HEX),
   )
-  const cycleIndex = usePaletteCycle(colors.length, CYCLE_MS, hovering)
-  // cycleIndex is 0 at rest, so the reel continues FROM the resting color on
-  // hover rather than snapping back to index 0 (spec §5.2).
-  const activeColor = colors.length > 0 ? colors[(restingIndex + cycleIndex) % colors.length] : null
+  // The reel runs on its own — the card should read as "this changes daily"
+  // without asking for a hover first. cycleIndex starts at 0, so it opens on
+  // the resting color and walks forward from there, not from index 0.
+  const cycleIndex = usePaletteCycle(colors.length, CYCLE_MS)
+  const cycledColor = colors.length > 0 ? colors[(restingIndex + cycleIndex) % colors.length] : null
+  // Hovering a swatch pins that color, exactly as on Create; releasing hands
+  // the card back to the reel.
+  const activeColor = (hoveredHex ? colors.find((c) => c.hex === hoveredHex) : null) ?? cycledColor
 
   return (
     <section className={styles.hero}>
@@ -61,16 +65,10 @@ export function HomeHero({ palette }: HomeHeroProps) {
       </div>
 
       {palette && activeColor && (
-        // H5: hover/focus only — deliberately NOT focusable itself. The card has
-        // no controls, so a tabIndex would add a dead focus stop; the hex, name
-        // and every swatch are readable at rest, so nothing lives only in motion.
-        <figure
-          className={styles.cardWrap}
-          onMouseEnter={() => setHovering(true)}
-          onMouseLeave={() => setHovering(false)}
-          onFocusCapture={() => setHovering(true)}
-          onBlurCapture={() => setHovering(false)}
-        >
+        // H5: the figure itself is deliberately NOT focusable — the swatches
+        // inside it are the controls, and the hex, name and every swatch are
+        // readable at rest, so nothing lives only in motion.
+        <figure className={styles.cardWrap}>
           <div className={styles.glow} style={{ background: activeColor.hex }} aria-hidden />
           <div className={styles.card}>
             <ShareCard
@@ -80,6 +78,7 @@ export function HomeHero({ palette }: HomeHeroProps) {
               paletteName={palette.name}
               rotationLabel={formatHourLabel(EXAMPLE_HOUR)}
               activeHex={activeColor.hex}
+              onPreviewColor={setHoveredHex}
             />
           </div>
           <figcaption className="sr-only">Example of a neighborhood's daily color card.</figcaption>

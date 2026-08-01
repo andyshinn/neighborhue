@@ -3,9 +3,14 @@
   background: url("/lockup-dark-text.png") left center / contain no-repeat;
 }
 
+/* The lockup art only fills 41% of its own height — the rest is transparent
+   margin — so a 44px box drew an 18px wordmark, dwarfed by the 44px Create
+   button beside it. Doubling the box puts the mark at 36px, level with that
+   button. The calc caps the width once the nav would otherwise outgrow the
+   viewport (~540px and below), which keeps it on one line down to 320px. */
 .nav {
-  width: 170px;
-  height: 44px;
+  width: min(340px, calc(100vw - 200px));
+  aspect-ratio: 340 / 88;
 }
 
 .footer {

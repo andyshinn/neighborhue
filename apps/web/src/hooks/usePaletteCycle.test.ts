@@ -50,28 +50,15 @@ describe('usePaletteCycle', () => {
     expect(result.current).toBe(0)
   })
 
-  it('does not advance while disabled', () => {
+  it('restarts from 0 when the palette changes', () => {
     stubReducedMotion(false)
     vi.useFakeTimers()
-    const { result } = renderHook(() => usePaletteCycle(3, 2000, false))
-    // One interval, not a whole cycle: a running timer would show 1 here, so
-    // this cannot pass by wrapping back around to 0.
-    act(() => vi.advanceTimersByTime(2000))
-    expect(result.current).toBe(0)
-  })
-
-  it('advances once enabled, and stops when disabled again', () => {
-    stubReducedMotion(false)
-    vi.useFakeTimers()
-    const { result, rerender } = renderHook(({ on }: { on: boolean }) => usePaletteCycle(3, 2000, on), {
-      initialProps: { on: true },
+    const { result, rerender } = renderHook(({ len }: { len: number }) => usePaletteCycle(len, 2000), {
+      initialProps: { len: 3 },
     })
     act(() => vi.advanceTimersByTime(2000))
     expect(result.current).toBe(1)
-    rerender({ on: false })
-    expect(result.current).toBe(0)
-    // Two more intervals: still 0 proves the timer was cleared, not merely reset.
-    act(() => vi.advanceTimersByTime(4000))
+    rerender({ len: 5 })
     expect(result.current).toBe(0)
   })
 })

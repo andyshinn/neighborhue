@@ -17,16 +17,25 @@
   cursor: pointer;
 }
 
+/* Two nested flex boxes on purpose: `align-items: baseline` alone aligns the
+   time and its tag to each other but parks the pair at the top of the box, so
+   the readout sat visibly high. The outer box centers, the inner one keeps the
+   two spans on a shared baseline. */
 .readout {
   flex: 1;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
   height: 46px;
   border-radius: 11px;
   border: 1px solid var(--hairline);
   background: var(--surface-2);
+}
+
+.readoutText {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .label {

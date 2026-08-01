@@ -55,18 +55,23 @@ export function ShareCard({
           {onPreviewColor ? (
             <fieldset className={styles.swatchRow} aria-label="Palette colors — hover to preview">
               {colors.map((c) => (
+                // The color lives on an inner chip so the button itself can be
+                // pure padding: buttons tile edge to edge, and the pointer
+                // never crosses dead space between them (which would drop the
+                // preview back to the cycling color for a frame).
                 <button
                   key={`${c.hex}-${c.name ?? ''}`}
                   type="button"
                   className={styles.swatch}
-                  style={{ background: c.hex }}
                   data-active={c.hex === highlight || undefined}
                   aria-label={c.name ? `${c.name} ${c.hex}` : c.hex}
                   onMouseEnter={() => onPreviewColor(c.hex)}
                   onFocus={() => onPreviewColor(c.hex)}
                   onMouseLeave={() => onPreviewColor(null)}
                   onBlur={() => onPreviewColor(null)}
-                />
+                >
+                  <span className={styles.chip} style={{ background: c.hex }} />
+                </button>
               ))}
             </fieldset>
           ) : (

@@ -81,34 +81,32 @@ describe('HomeHero', () => {
     expect(screen.queryByText('Fern')).not.toBeInTheDocument()
   })
 
-  // Use userEvent.hover, not a raw MouseEvent: React synthesizes onMouseEnter
-  // from delegated mouseover/mouseout, so dispatching by hand is unreliable.
-  // With fake timers, userEvent must be told how to advance them.
-  it('cycles while hovered and settles back on leave', async () => {
+  it('cycles on its own, with no hover', () => {
     stubReducedMotion(false)
-    // shouldAdvanceTime: @testing-library/react's asyncWrapper drains the
-    // microtask queue after every userEvent call via a bare `setTimeout(fn, 0)`
-    // and only knows how to auto-advance *Jest* fake timers
-    // (`typeof jest !== 'undefined'`) — under Vitest that check is always
-    // false, so without this option the orphaned timer never fires and
-    // `await user.hover(...)` hangs forever. This lets the fake clock tick
-    // forward with real time so that housekeeping timer still resolves; our
-    // own `vi.advanceTimersByTime(2000)` below still drives the interval
-    // deterministically.
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    vi.useFakeTimers()
     render(<HomeHero palette={palette} />)
-    const figure = screen.getByRole('figure')
     expect(screen.getByText('Blue')).toBeInTheDocument()
-
-    await user.hover(figure)
     act(() => {
       vi.advanceTimersByTime(2000)
     })
     // Blue is index 2, so one tick past the resting offset wraps to Red.
     expect(screen.getByText('Red')).toBeInTheDocument()
+  })
 
-    await user.unhover(figure)
+  // Use userEvent.hover, not a raw MouseEvent: React synthesizes onMouseEnter
+  // from delegated mouseover/mouseout, so dispatching by hand is unreliable.
+  // Reduced motion is stubbed on so the reel holds still and only the hover
+  // moves the card.
+  it('pins a hovered swatch and hands the card back on leave', async () => {
+    stubReducedMotion(true)
+    render(<HomeHero palette={palette} />)
+    expect(screen.getByText('Blue')).toBeInTheDocument()
+
+    const orange = screen.getByRole('button', { name: /Orange/ })
+    await userEvent.hover(orange)
+    expect(screen.getByText('Orange')).toBeInTheDocument()
+
+    await userEvent.unhover(orange)
     expect(screen.getByText('Blue')).toBeInTheDocument()
   })
 

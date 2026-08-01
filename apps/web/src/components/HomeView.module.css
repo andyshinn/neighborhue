@@ -10,7 +10,10 @@
   gap: 16px;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 24px 30px;
+  /* Trimmed from 24px when the lockup doubled: the art's own transparent
+     margin grew by the same amount, so this keeps the airspace above the
+     wordmark where it was. */
+  padding: 12px 30px;
 }
 
 .create {

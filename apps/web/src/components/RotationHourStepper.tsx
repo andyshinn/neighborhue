@@ -14,8 +14,10 @@ export function RotationHourStepper({ hour, onChange }: RotationHourStepperProps
         <MinusIcon aria-hidden />
       </button>
       <div className={styles.readout} aria-live="polite">
-        <span className={styles.label}>{formatHourLabel(hour)}</span>
-        <span className={styles.tag}>local</span>
+        <span className={styles.readoutText}>
+          <span className={styles.label}>{formatHourLabel(hour)}</span>
+          <span className={styles.tag}>local</span>
+        </span>
       </div>
       <button type="button" className={styles.step} aria-label="Later hour" onClick={() => onChange((hour + 1) % 24)}>
         <PlusIcon aria-hidden />
