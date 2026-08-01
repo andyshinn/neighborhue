@@ -41,7 +41,7 @@ describe('palette queries', () => {
     const db = getDb(env.DB)
     await seedPalettes(db)
 
-    expect((await getPaletteBySlug(db, 'rainbow'))?.name).toBe('Rainbow Colors')
+    expect((await getPaletteBySlug(db, 'rainbow'))?.name).toBe('Rainbow')
     expect((await getDefaultPalette(db))?.slug).toBe('rainbow')
 
     const colors = await getPaletteColors(db, 'pal_rainbow')

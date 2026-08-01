@@ -16,7 +16,7 @@ const CARDS = [
     body: 'Drop the public link in the group chat. Neighbors just open it — no app to install.',
   },
   {
-    tone: 'amber',
+    tone: 'orange',
     Icon: SunIcon,
     title: 'Point your lights',
     body: "Home Assistant reads today's color and applies it to your lights automatically each morning.",

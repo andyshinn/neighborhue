@@ -212,5 +212,63 @@ At deploy: verify the raw SSR HTML contains the H1 and section copy (writing byt
 ## 10. Open items
 
 - **`og:image`** — deferred (§3.2). Home ships with OG title and description only; unfurls will show text, not a card.
-- **Example neighborhood** — if a permanent demo is ever seeded, H1/H2 can be revisited to make "See a live example" real. Deliberately not blocking this spec.
+- **Example neighborhood** — if a permanent demo is ever seeded, H1/H2 can be revisited to make "See a live example" real. Deliberately not blocking this spec. *(Taken up — see §11 R1.)*
 - **`--warning`** — still differs from the handoff's `#b7791f` (carried from 2a §11). Home does not use it, so it stays open.
+
+---
+
+## 11. Revision — 2026-08-01
+
+The page shipped with the right content and the wrong design. This revision
+supersedes H1–H6 and H11 above; everything else in this document still holds.
+
+Two things drove it. The handoff **only ever specified the light theme**, so
+dark mode had never been designed — it fell out of Radix Sand's dark ramp, which
+is near-neutral (`#111110`), and read as generic black-on-charcoal rather than
+the warm sand the light theme is built on. And the hero card was a hedged
+illustration on a page whose entire claim is that things change.
+
+| # | Supersedes | Decision | Rationale |
+|---|---|---|---|
+| R1 | H1, H2 | **The card reads a real neighborhood; both "live example" links return** | `VITE_DEMO_NEIGHBORHOOD_ID` names a neighborhood the route prefetches alongside palettes, so the hero server-renders today's true `color.hex`, `color.name`, palette and `seconds_until_rotation`. The id is configured, not committed: it names a row that must exist in whichever environment is targeted. Unset is a supported state — `FALLBACK_EXAMPLE` (Rainbow's Blue) draws instead and both links are withheld, so H2's "never mislabel a link" survives intact rather than being traded away. |
+| R2 | — | **Dark theme is designed, not inherited** | Surfaces and edges move to Radix **Bronze** (`bronze-1/2/3`, `bronze-a3/a4`), the warm counterpart to Sand, landing within a unit or two of the intended values — `bronze-a3` is exactly the specified `.09` hairline alpha. Type stays on Sand: Bronze's 11/12 steps are visibly tan. Links get their own `--link` token at `indigo-11` in dark, because solid `--accent` (`indigo-9`) on a near-black page is under 3:1; `--accent` does not move, since it still fills rings and check discs. |
+| R3 | — | **The countdown is the detail panel's headline** | "Next color in" + a ticking `HH:MM:SS` sits above the rule; the palette drops to an 11.5px label below it. This is the only element on the page that demonstrates the product's central claim. Seeded from the server reading and corrected on mount by the existing `useCountdown`, so hydration matches byte-for-byte; tabular figures in a monospace face mean the string cannot change width as it ticks. |
+| R4 | — | **Ink is white-first with a darkening budget, not naive max-contrast** | Maximum contrast puts **black** on `#0080FF` (5.5:1 vs white's 3.8:1) — legible and visually muddy, and it drags the dark-text lockup onto mid-tone blue where it disappears. Now: white if it clears AA on the true hue; else darken the *painted* panel up to 20% until it does; else dark ink on the true hue. `colorTheme` returns `panelBg` for the adjusted surface — the hex chip and color name always print the original, so nothing depends on the adjustment. Applied globally: the share page had the identical defect. |
+| R5 | H3, H4, H11 | **The hero reel is gone** | The card cycling the palette every 2s implied faster-than-daily rotation and was a workaround for having no real reading. With a real one, the card shows today's color and the countdown supplies the motion. `SwatchRow`'s `activeHex` (H11) stays — Create still uses it — but Home no longer does. |
+| R6 | H6 | **HA band gets the HACS/blueprint copy and a "See the setup" button** | Reversed by the product owner: the band now reads "Install the Neighborhue integration from HACS and paste your neighborhood ID, or one-click import the blueprint automation." The YAML leaves the band. **"See the setup" points at the repo README's Home Assistant section** — the only setup documentation that exists today, and a stand-in until the HACS integration has its own docs. |
+
+**Also fixed**
+
+- **Footer lockup** — rendered at ~14px, reading as a missing image. The art fills only **40.85%** of the PNG's height (rows 150–350 of 492), so the handoff's "34px" describes the *mark*, and the box has to be ~83px tall. Same trap the nav hit and fixed; the footer never was.
+- **Glow** — it existed, but at light-mode values over near-black it read as a smudge. Dark mode gets a stronger, larger near wash plus a second very faint one, so the color spills into the page instead of ending at a rectangle edge. Each wash animates around its own base opacity: a keyframe's `opacity` *replaces* the declared value rather than scaling it, so one shared track would drive all of them to near-opaque.
+- **Sun tile** — amber → Radix **orange**. `amber-11` is a yellow (`#ffca16` dark) and the glyph washed out against its own tile.
+- **`a` / `a:hover`** — declared globally, wrapped in `:where()`. The `:hover` half is why: a plain `a:hover` (0,1,1) outranks a component's `.button` (0,1,0) and would repaint every button-styled anchor's label on Create, Share and Manage.
+- **Palette name** — "Rainbow Colors" was the API's own seed value, not the web appending a word. Renamed to "Rainbow" in `apps/api/seed/palettes.ts`.
+
+**Where the demo id lives**
+
+`VITE_*` is inlined by `vite build`, **not** read at runtime, so this value cannot
+come from a Worker binding or `wrangler secret` — by the time the Worker runs the
+bundle is fixed. It is also loaded from `apps/web/.env`, Vite's own project root;
+a `.env` at the monorepo root is inert (verified — the id never reached the
+bundle). Since `.env` is gitignored, the production id is committed as the
+default in `lib/config.ts`, matching the `API_URL` line directly above it: a
+build on a machine without the `.env` would otherwise ship the fallback card
+silently, with nothing failing to notice. The env var still overrides, and
+setting it **empty** disables the live example — which is the only way left to
+exercise the fallback path locally.
+
+**Done since**
+
+- **Rainbow rename on remote D1** — applied. `seed.sql` uses `INSERT OR IGNORE`, so
+  re-seeding would *not* have updated the existing row; it took an explicit
+  `wrangler d1 execute neighborhue --remote --command "UPDATE palettes SET
+  name='Rainbow' WHERE slug='rainbow'"` (1 row changed, confirmed via
+  `GET /v1/palettes`). Any future rename of a seeded row needs the same treatment.
+
+**Open**
+
+- **The demo neighborhood has no name**, so the card eyebrow reads "This
+  neighborhood · today" rather than a street name. A `PATCH` with its admin
+  secret would fix it.
+- **HACS integration + blueprint** — the band's copy now asserts both exist. If they do not ship, this copy has to change, and "See the setup" should move to their docs when they do.

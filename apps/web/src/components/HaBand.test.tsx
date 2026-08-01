@@ -3,17 +3,19 @@ import { describe, expect, it } from 'vitest'
 import { HaBand } from './HaBand'
 
 describe('HaBand', () => {
-  it('describes the REST-sensor setup that actually ships', () => {
+  it('makes one short promise instead of inlining YAML', () => {
     render(<HaBand />)
     expect(screen.getByRole('heading', { name: 'Made for Home Assistant' })).toBeInTheDocument()
-    expect(screen.getByText(/ready-made REST sensor and automation/i)).toBeInTheDocument()
+    expect(screen.getByText(/Install the Neighborhue integration from HACS/i)).toBeInTheDocument()
+    // The snippet belongs on the setup page; a marketing band that prints a
+    // config file is documentation wearing marketing's clothes.
+    expect(screen.queryByText(/configuration\.yaml/i)).not.toBeInTheDocument()
   })
 
-  // H6 is a deliberate omission: there is no setup page to link to yet, and the
-  // handoff's target (Manage) is unreachable for a public visitor.
-  it('renders no call to action', () => {
+  it('sends the reader somewhere', () => {
     render(<HaBand />)
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    const cta = screen.getByRole('link', { name: /see the setup/i })
+    expect(cta).toHaveAttribute('href', 'https://github.com/andyshinn/neighborhue#home-assistant')
+    expect(cta).toHaveAttribute('rel', 'noopener noreferrer')
   })
 })

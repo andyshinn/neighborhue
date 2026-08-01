@@ -46,9 +46,12 @@
   color: var(--pink-11);
 }
 
-.tile[data-tone="amber"] {
-  background: var(--amber-3);
-  color: var(--amber-11);
+/* Orange, not amber: amber-11 is a yellow (#ffca16 in dark) and the sun glyph
+   read as washed-out against its own tile. orange-11 is #cc4e00 / #ffa057 —
+   the warm accent the handoff actually specifies for this tile. */
+.tile[data-tone="orange"] {
+  background: var(--orange-3);
+  color: var(--orange-11);
 }
 
 .title {

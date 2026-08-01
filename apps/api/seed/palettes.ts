@@ -17,7 +17,7 @@ export interface SeedPalette {
 export const PALETTES: SeedPalette[] = [
   {
     slug: 'rainbow',
-    name: 'Rainbow Colors',
+    name: 'Rainbow',
     description: 'The classic seven-color rainbow.',
     isDefault: true,
     colors: [

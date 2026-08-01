@@ -1,10 +1,11 @@
-import { RocketIcon } from '@radix-ui/react-icons'
+import { ArrowRightIcon, RocketIcon } from '@radix-ui/react-icons'
 import styles from './HaBand.module.css'
 
-// H6: the handoff described a HACS integration and a one-click blueprint
-// import; neither exists. This describes what actually ships — the REST sensor
-// and automation YAML that HaPanel discloses on every share page (spec 2a).
-// No button: there is no setup page to stand behind yet.
+// The setup instructions live in the repo README's Home Assistant section —
+// the only setup documentation that exists today. If the HACS integration ever
+// gets its own docs site, this is the one line to change.
+const SETUP_URL = 'https://github.com/andyshinn/neighborhue#home-assistant'
+
 export function HaBand() {
   return (
     <section className={styles.band}>
@@ -14,11 +15,13 @@ export function HaBand() {
       <div className={styles.text}>
         <h2 className={styles.title}>Made for Home Assistant</h2>
         <p className={styles.body}>
-          Every neighborhood page carries a ready-made REST sensor and automation — copy the YAML into your{' '}
-          <code className={styles.code}>configuration.yaml</code> and Home Assistant applies today's color each morning.
-          Plain RGB bulbs work too.
+          Install the Neighborhue integration from HACS and paste your neighborhood ID, or one-click import the blueprint
+          automation. Plain RGB bulbs work too.
         </p>
       </div>
+      <a className={styles.cta} href={SETUP_URL} target="_blank" rel="noopener noreferrer">
+        See the setup <ArrowRightIcon aria-hidden />
+      </a>
     </section>
   )
 }

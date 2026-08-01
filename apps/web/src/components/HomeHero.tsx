@@ -1,46 +1,22 @@
 import { ArrowRightIcon, CheckIcon, SunIcon } from '@radix-ui/react-icons'
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
-import { usePaletteCycle } from '../hooks/usePaletteCycle'
-import { formatHourLabel } from '../lib/hour'
-import type { HeroPalette } from '../lib/palette'
+import type { HeroExample } from '../lib/heroExample'
+import { HomeCard } from './HomeCard'
 import styles from './HomeHero.module.css'
-import { ShareCard } from './ShareCard'
 
 interface HomeHeroProps {
-  palette: HeroPalette | null
+  example: HeroExample
+  onExpire?: () => void
 }
 
-// H4: the card rests on Rainbow's Blue — calmer than the palette's first color
-// (pure red) at hero scale. Matched by hex, not index, so reordering the
-// palette cannot silently change it; index 0 is the fallback if it is removed.
-const RESTING_HEX = '#0080FF'
-const EXAMPLE_NAME = 'Maple Street'
-const EXAMPLE_HOUR = 7
-const CYCLE_MS = 2000
 const CHECKS = ['No accounts', 'No logins', 'About a minute to set up']
 
-export function HomeHero({ palette }: HomeHeroProps) {
-  const [hoveredHex, setHoveredHex] = useState<string | null>(null)
-  const colors = palette?.colors ?? []
-  const restingIndex = Math.max(
-    0,
-    colors.findIndex((c) => c.hex.toUpperCase() === RESTING_HEX),
-  )
-  // The reel runs on its own — the card should read as "this changes daily"
-  // without asking for a hover first. cycleIndex starts at 0, so it opens on
-  // the resting color and walks forward from there, not from index 0.
-  const cycleIndex = usePaletteCycle(colors.length, CYCLE_MS)
-  const cycledColor = colors.length > 0 ? colors[(restingIndex + cycleIndex) % colors.length] : null
-  // Hovering a swatch pins that color, exactly as on Create; releasing hands
-  // the card back to the reel.
-  const activeColor = (hoveredHex ? colors.find((c) => c.hex === hoveredHex) : null) ?? cycledColor
-
+export function HomeHero({ example, onExpire }: HomeHeroProps) {
   return (
     <section className={styles.hero}>
       <div className={styles.copy}>
         <span className={styles.eyebrow}>
-          <SunIcon aria-hidden /> One color a day
+          <SunIcon aria-hidden className={styles.eyebrowIcon} /> One color a day
         </span>
         <h1 className={styles.h1}>The whole neighborhood glows the same color.</h1>
         <p className={styles.sub}>
@@ -51,9 +27,14 @@ export function HomeHero({ palette }: HomeHeroProps) {
           <Link to="/create" className={styles.primary}>
             Create a neighborhood <ArrowRightIcon aria-hidden />
           </Link>
-          <a href="#how" className={styles.secondary}>
-            How it works
-          </a>
+          {/* Only offered when there is a real neighborhood to land on. With no
+              demo configured the hero keeps one button rather than promising a
+              live example it cannot show. */}
+          {example.id && (
+            <Link to="/n/$id" params={{ id: example.id }} className={styles.secondary}>
+              See a live example
+            </Link>
+          )}
         </div>
         <ul className={styles.checks}>
           {CHECKS.map((label) => (
@@ -64,26 +45,17 @@ export function HomeHero({ palette }: HomeHeroProps) {
         </ul>
       </div>
 
-      {palette && activeColor && (
-        // H5: the figure itself is deliberately NOT focusable — the swatches
-        // inside it are the controls, and the hex, name and every swatch are
-        // readable at rest, so nothing lives only in motion.
-        <figure className={styles.cardWrap}>
-          <div className={styles.glow} style={{ background: activeColor.hex }} aria-hidden />
-          <div className={styles.card}>
-            <ShareCard
-              name={EXAMPLE_NAME}
-              activeColor={activeColor}
-              colors={palette.colors}
-              paletteName={palette.name}
-              rotationLabel={formatHourLabel(EXAMPLE_HOUR)}
-              activeHex={activeColor.hex}
-              onPreviewColor={setHoveredHex}
-            />
-          </div>
-          <figcaption className="sr-only">Example of a neighborhood's daily color card.</figcaption>
-        </figure>
-      )}
+      <figure className={styles.cardWrap}>
+        {/* Two washes of the TRUE hue (not the ink-adjusted panel color): the
+            near one is the card's own spill, the far one only exists in dark,
+            where it keeps the color from ending in a hard rectangle edge. */}
+        <div className={styles.glowFar} style={{ background: example.hex }} aria-hidden />
+        <div className={styles.glow} style={{ background: example.hex }} aria-hidden />
+        <HomeCard example={example} onExpire={onExpire} />
+        {/* Present only while the card is an illustration. Once it is reading a
+            real neighborhood there is nothing to disclaim. */}
+        {!example.live && <figcaption className="sr-only">Example of a neighborhood's daily color card.</figcaption>}
+      </figure>
     </section>
   )
 }

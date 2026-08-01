@@ -1,119 +1,67 @@
-import { act, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen } from '@testing-library/react'
 import type { ComponentProps } from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { HeroPalette } from '../lib/palette'
+import { describe, expect, it, vi } from 'vitest'
+import { FALLBACK_EXAMPLE, type HeroExample } from '../lib/heroExample'
 import { HomeHero } from './HomeHero'
 
+// The real Link builds its href from `to` plus `params`; the stub has to do the
+// same or every /n/$id assertion would pass against a literal "$id".
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...rest }: ComponentProps<'a'> & { to?: string }) => (
-    <a href={to} {...rest}>
+  Link: ({ children, to, params, ...rest }: ComponentProps<'a'> & { to?: string; params?: Record<string, string> }) => (
+    <a href={Object.entries(params ?? {}).reduce((path, [k, v]) => path.replace(`$${k}`, v), to ?? '')} {...rest}>
       {children}
     </a>
   ),
 }))
 
-const original = window.matchMedia
-
-afterEach(() => {
-  window.matchMedia = original
-  vi.useRealTimers()
-})
-
-// usePaletteCycle reads prefers-reduced-motion; happy-dom has no real media
-// queries, so state it explicitly.
-function stubReducedMotion(matches: boolean) {
-  window.matchMedia = ((query: string) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    addListener: () => {},
-    removeListener: () => {},
-    dispatchEvent: () => false,
-  })) as unknown as typeof window.matchMedia
-}
-
-const palette: HeroPalette = {
-  name: 'Rainbow Colors',
-  colors: [
-    { hex: '#FF0000', name: 'Red' },
-    { hex: '#FF8000', name: 'Orange' },
-    { hex: '#0080FF', name: 'Blue' },
-  ],
+const live: HeroExample = {
+  ...FALLBACK_EXAMPLE,
+  live: true,
+  id: 'abc-123',
+  seconds: 3661,
+  nextRotationAt: new Date(Date.now() + 3_661_000).toISOString(),
 }
 
 describe('HomeHero', () => {
-  it('renders the headline, both CTAs and the reassurance row', () => {
-    stubReducedMotion(true)
-    render(<HomeHero palette={palette} />)
+  it('renders the headline and the reassurance row', () => {
+    render(<HomeHero example={live} />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The whole neighborhood glows the same color.')
-    expect(screen.getByRole('link', { name: /create a neighborhood/i })).toHaveAttribute('href', '/create')
-    expect(screen.getByRole('link', { name: /how it works/i })).toHaveAttribute('href', '#how')
     expect(screen.getByText('No accounts')).toBeInTheDocument()
     expect(screen.getByText('No logins')).toBeInTheDocument()
     expect(screen.getByText('About a minute to set up')).toBeInTheDocument()
   })
 
-  // H4: Blue, not the palette's first color.
-  it('rests on Rainbow blue', () => {
-    stubReducedMotion(true)
-    render(<HomeHero palette={palette} />)
-    expect(screen.getByText('Blue')).toBeInTheDocument()
-    expect(screen.queryByText('Red')).not.toBeInTheDocument()
+  // Issue #6: the hero's second button goes to the product, not further down
+  // the page. The #how anchor stays on the section itself.
+  it('points the secondary CTA at the live neighborhood, not #how', () => {
+    render(<HomeHero example={live} />)
+    expect(screen.getByRole('link', { name: /create a neighborhood/i })).toHaveAttribute('href', '/create')
+    expect(screen.getByRole('link', { name: /see a live example/i })).toHaveAttribute('href', '/n/abc-123')
+    expect(screen.queryByRole('link', { name: /how it works/i })).not.toBeInTheDocument()
   })
 
-  it('falls back to the first color when the resting hex is absent', () => {
-    stubReducedMotion(true)
-    render(
-      <HomeHero
-        palette={{
-          name: 'Warm',
-          colors: [
-            { hex: '#FF3B30', name: 'Scarlet' },
-            { hex: '#12A150', name: 'Fern' },
-          ],
-        }}
-      />,
-    )
-    expect(screen.getByText('Scarlet')).toBeInTheDocument()
-    expect(screen.queryByText('Fern')).not.toBeInTheDocument()
+  it('withholds the live-example CTA when no demo neighborhood is configured', () => {
+    render(<HomeHero example={FALLBACK_EXAMPLE} />)
+    expect(screen.getByRole('link', { name: /create a neighborhood/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /see a live example/i })).not.toBeInTheDocument()
   })
 
-  it('cycles on its own, with no hover', () => {
-    stubReducedMotion(false)
-    vi.useFakeTimers()
-    render(<HomeHero palette={palette} />)
-    expect(screen.getByText('Blue')).toBeInTheDocument()
-    act(() => {
-      vi.advanceTimersByTime(2000)
-    })
-    // Blue is index 2, so one tick past the resting offset wraps to Red.
-    expect(screen.getByText('Red')).toBeInTheDocument()
+  it('paints the glow with the true hue, not the ink-adjusted panel color', () => {
+    const { container } = render(<HomeHero example={live} />)
+    const glows = container.querySelectorAll('[aria-hidden="true"][style*="background"]')
+    expect(glows.length).toBe(2)
+    for (const glow of glows) {
+      expect(glow).toHaveStyle({ background: '#0080FF' })
+    }
   })
 
-  // Use userEvent.hover, not a raw MouseEvent: React synthesizes onMouseEnter
-  // from delegated mouseover/mouseout, so dispatching by hand is unreliable.
-  // Reduced motion is stubbed on so the reel holds still and only the hover
-  // moves the card.
-  it('pins a hovered swatch and hands the card back on leave', async () => {
-    stubReducedMotion(true)
-    render(<HomeHero palette={palette} />)
-    expect(screen.getByText('Blue')).toBeInTheDocument()
+  // The disclaimer exists precisely while the card is an illustration; once it
+  // reads a real neighborhood there is nothing to disclaim.
+  it('captions the card only while it is a fallback illustration', () => {
+    const { rerender } = render(<HomeHero example={FALLBACK_EXAMPLE} />)
+    expect(screen.getByText("Example of a neighborhood's daily color card.")).toBeInTheDocument()
 
-    const orange = screen.getByRole('button', { name: /Orange/ })
-    await userEvent.hover(orange)
-    expect(screen.getByText('Orange')).toBeInTheDocument()
-
-    await userEvent.unhover(orange)
-    expect(screen.getByText('Blue')).toBeInTheDocument()
-  })
-
-  it('renders the copy column without a card when no palette is available', () => {
-    stubReducedMotion(true)
-    render(<HomeHero palette={null} />)
-    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
-    expect(screen.queryByRole('figure')).not.toBeInTheDocument()
+    rerender(<HomeHero example={live} />)
+    expect(screen.queryByText("Example of a neighborhood's daily color card.")).not.toBeInTheDocument()
   })
 })

@@ -30,7 +30,7 @@ export function ShareCard({
   return (
     <div className={styles.card}>
       {activeColor && theme ? (
-        <div className={styles.colorPanel} style={{ background: activeColor.hex, color: theme.ink }}>
+        <div className={styles.colorPanel} style={{ background: theme.panelBg, color: theme.ink }}>
           <div className={styles.colorTop}>
             <Logo lockup={theme.lockup} height={30} />
             <span className={styles.hexChip} style={{ background: theme.chipBg }}>

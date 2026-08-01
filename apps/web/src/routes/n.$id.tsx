@@ -114,7 +114,7 @@ function NeighborhoodShare() {
         shareUrl={shareUrl}
         seconds={seconds}
         palette={palette}
-        hue={data.color.hex}
+        hue={theme.panelBg}
         ink={theme.ink}
       />
     </main>

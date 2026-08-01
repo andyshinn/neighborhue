@@ -13,6 +13,7 @@
 @import "@radix-ui/colors/red.css";
 @import "@radix-ui/colors/green.css";
 @import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/orange.css";
 @import "@radix-ui/colors/pink.css";
 
 :root {
@@ -28,11 +29,22 @@
   --text: var(--sand-12);
   --text-muted: var(--sand-11);
   --text-faint: var(--sand-10);
+  --text-faintest: var(--sand-9); /* #8d8d86 ≈ handoff #9a968e */
   --hairline: var(--sand-a5);
+  --border-strong: var(--sand-a6); /* the ghost-button / input edge, one step up from a hairline */
 
   /* accents (scale-mapped). indigo-9 / red-9 are identical across light+dark. */
   --accent: var(--indigo-9); /* #3e63dd exact */
   --accent-hover: var(--indigo-10);
+
+  /* Links are TEXT on a neutral surface, so they take Radix's text steps (11/12),
+     not the solid steps (9/10) that --accent uses for fills and rings. In light
+     mode step 9 happens to be the brand indigo and reads correctly on white, so
+     the two coincide here — but they must not in dark, where a solid #3e63dd on
+     a near-black page falls under 3:1. Splitting them is what lets the dark
+     block below re-point links without turning every indigo fill pale. */
+  --link: var(--indigo-9); /* #3e63dd exact */
+  --link-hover: var(--indigo-11); /* #3a5bc7 ≈ handoff #3a5ccc */
   --danger: var(--red-9); /* #e5484d exact */
   --danger-tint: var(--red-3);
   --success: var(--green-10);
@@ -44,6 +56,10 @@
      flip to their dark values in the media block below. No dark branch needed. */
   --cta-bg: var(--sand-12);
   --cta-fg: var(--sand-1);
+  /* No Radix step sits beyond 12, and the hover deliberately overshoots the
+     ramp — the solid CTA goes to true black in light and true white in dark.
+     Both are re-stated in the dark block, where sand-12/sand-1 have swapped. */
+  --cta-bg-hover: #000000;
 
   --shadow-card: 0 16px 44px rgba(0, 0, 0, 0.14);
   --shadow-modal: 0 30px 80px rgba(0, 0, 0, 0.35);
@@ -83,24 +99,61 @@
     --sand-a11: #fffcf4b0;
     --sand-a12: #fffffded;
 
+    /* Radix Bronze dark — the SURFACE ramp (from @radix-ui/colors 3.0.0
+       bronze-dark.css + bronze-dark-alpha.css). Sand's dark ramp is very nearly
+       neutral (#111110, #191918), which is why dark mode read as generic
+       black-on-charcoal rather than the warm sand the light theme is built on.
+       Bronze is Radix's warm tinted gray and its low steps land within a unit or
+       two of the intended values. Only steps 1–4 are declared: this scale is used
+       for backgrounds and edges ONLY — its text steps (bronze-11 #d4b3a5,
+       bronze-12 #ede0d9) are visibly tan, so type stays on Sand below. Adding a
+       Bronze step here means checking it against that split first. */
+    --bronze-1: #141110;
+    --bronze-2: #1c1917;
+    --bronze-3: #262220;
+    --bronze-4: #302a27;
+    --bronze-a3: #faceb817; /* α .090 */
+    --bronze-a4: #facdb622; /* α .133 */
+
     /* accent dark steps (used subset — see note above) */
     --indigo-3: #182449;
     --indigo-9: #3e63dd;
     --indigo-10: #5472e4;
     --indigo-11: #9eb1ff;
+    --indigo-12: #d6e1ff;
     --pink-3: #37172f;
     --pink-11: #ff8dcc;
     --red-3: #3b1219;
     --red-9: #e5484d;
     --green-3: #132d21;
     --green-10: #33b074;
+    --green-11: #3dd68c;
     --amber-3: #302008;
     --amber-11: #ffca16;
+    --orange-3: #331e0b;
+    --orange-11: #ffa057;
 
-    /* elevation flips direction between themes: surfaces re-point to other steps */
-    --page-bg: var(--sand-1);
-    --surface: var(--sand-2);
-    --surface-2: var(--sand-3);
-    --shadow-card: 0 16px 44px rgba(0, 0, 0, 0.5);
+    /* elevation flips direction between themes: surfaces re-point to other steps.
+       Backgrounds and edges take Bronze (warm); type keeps Sand (see above). */
+    --page-bg: var(--bronze-1);
+    --surface: var(--bronze-2);
+    --surface-2: var(--bronze-3);
+    --hairline: var(--bronze-a3);
+    --border-strong: var(--bronze-a4);
+    --text-faintest: var(--sand-9); /* #6f6d66 — re-stated so it tracks the dark ramp */
+    --cta-bg-hover: #ffffff; /* the CTA is light-on-dark here, so hover brightens */
+
+    /* Links move from the solid step to the text step: #3e63dd on a near-black
+       page is under 3:1. --accent deliberately does NOT move — it still fills
+       selected rings and check discs, where the solid indigo is correct. */
+    --link: var(--indigo-11);
+    --link-hover: var(--indigo-12);
+    /* green-11, not green-10: the check glyphs are small and sit on a dark
+       surface, where the solid step is too dim to read as "yes". */
+    --success: var(--green-11);
+
+    /* Deeper and softer than light: on a near-black page a tight, dense shadow
+       is invisible, and the card needs the lift to separate from the page. */
+    --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.55);
   }
 }

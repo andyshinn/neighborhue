@@ -28,8 +28,22 @@ textarea {
   font: inherit;
   color: inherit;
 }
-a {
-  color: inherit;
+/* Content links, in both themes — --link is a text-step token, so it stays
+   legible on the dark page where the solid --accent would not be.
+   :where() zeroes the specificity, which matters for the :hover half: a plain
+   `a:hover` (0,1,1) would outrank a component's `.button` (0,1,0) and repaint
+   every button-styled anchor's label on hover. Wrapped this way, any class wins
+   without having to defend itself, and real links still can't fall through to
+   the UA's default blue. */
+:where(a) {
+  color: var(--link);
+  text-decoration: none;
+}
+
+:where(a:hover) {
+  color: var(--link-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* Screen-reader-only text: available to assistive tech, invisible on screen. */

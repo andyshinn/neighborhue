@@ -13,9 +13,15 @@
   aspect-ratio: 340 / 88;
 }
 
+/* Same trap the nav hit: the lockup art fills only 40.85% of the PNG's height
+   (rows 150–350 of 492), the rest being transparent margin, so the old 34px-tall
+   box drew a 14px wordmark that read as a missing image. The handoff's "34px"
+   describes the MARK, so the box has to be 34 / 0.4085 ≈ 83px tall. Width comes
+   from the file's own 1764:492 ratio, which keeps the box tight around the art
+   instead of padding it out; min() lets it shrink before the footer row wraps. */
 .footer {
-  width: 131px;
-  height: 34px;
+  width: min(298px, 55vw);
+  aspect-ratio: 1764 / 492;
 }
 
 @media (prefers-color-scheme: dark) {

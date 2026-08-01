@@ -1,59 +1,53 @@
 import { render, screen } from '@testing-library/react'
 import type { ComponentProps } from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { HeroPalette } from '../lib/palette'
+import { describe, expect, it, vi } from 'vitest'
+import { FALLBACK_EXAMPLE, type HeroExample } from '../lib/heroExample'
 import { HomeView } from './HomeView'
 
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...rest }: ComponentProps<'a'> & { to?: string }) => (
-    <a href={to} {...rest}>
+  Link: ({ children, to, params, ...rest }: ComponentProps<'a'> & { to?: string; params?: Record<string, string> }) => (
+    <a href={Object.entries(params ?? {}).reduce((path, [k, v]) => path.replace(`$${k}`, v), to ?? '')} {...rest}>
       {children}
     </a>
   ),
 }))
 
-const original = window.matchMedia
-
-afterEach(() => {
-  window.matchMedia = original
-})
-
-function stubReducedMotion(matches: boolean) {
-  window.matchMedia = ((query: string) => ({
-    matches,
-    media: query,
-    onchange: null,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    addListener: () => {},
-    removeListener: () => {},
-    dispatchEvent: () => false,
-  })) as unknown as typeof window.matchMedia
+const live: HeroExample = {
+  ...FALLBACK_EXAMPLE,
+  live: true,
+  id: 'abc-123',
+  seconds: 3661,
+  nextRotationAt: new Date(Date.now() + 3_661_000).toISOString(),
 }
-
-const palette: HeroPalette = { name: 'Rainbow Colors', colors: [{ hex: '#0080FF', name: 'Blue' }] }
 
 describe('HomeView', () => {
   it('renders every section', () => {
-    stubReducedMotion(true)
-    render(<HomeView palette={palette} />)
+    render(<HomeView example={live} />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The whole neighborhood glows the same color.')
     expect(screen.getByRole('heading', { name: 'How it works' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Made for Home Assistant' })).toBeInTheDocument()
     expect(screen.getByText('A shared color for the whole neighborhood.')).toBeInTheDocument()
   })
 
-  it('offers Create in the nav', () => {
-    stubReducedMotion(true)
-    render(<HomeView palette={palette} />)
+  it('gives the nav a named lockup, Live example and Create', () => {
+    render(<HomeView example={live} />)
+    const nav = screen.getByRole('navigation', { name: 'Main' })
+    expect(screen.getByRole('link', { name: 'Neighborhue home' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Live example' })).toHaveAttribute('href', '/n/abc-123')
     expect(screen.getByRole('link', { name: 'Create' })).toHaveAttribute('href', '/create')
+    expect(nav.querySelectorAll('a')).toHaveLength(3)
   })
 
-  // H2: with no example neighborhood, a "Live example" link could only point at
-  // /create, which would be a lie.
-  it('has no live-example link', () => {
-    stubReducedMotion(true)
-    render(<HomeView palette={palette} />)
+  it('drops the nav live-example link when no demo neighborhood is configured', () => {
+    render(<HomeView example={FALLBACK_EXAMPLE} />)
     expect(screen.queryByRole('link', { name: /live example/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Create' })).toBeInTheDocument()
+  })
+
+  // The #how anchor stays on the section even though the hero no longer spends
+  // a button on it — the footer still links there.
+  it('keeps the #how anchor on the how-it-works section', () => {
+    const { container } = render(<HomeView example={live} />)
+    expect(container.querySelector('#how')).toBeInTheDocument()
   })
 })

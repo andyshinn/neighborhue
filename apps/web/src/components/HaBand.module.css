@@ -39,7 +39,26 @@
   max-width: 560px;
 }
 
-.code {
-  font-family: var(--font-mono);
-  font-size: 13px;
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* A ghost button, so hover is a surface tint rather than a color change. */
+.cta:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  text-decoration: none;
 }

@@ -14,7 +14,10 @@ interface ShareColorFieldProps {
 export function ShareColorField({ name, color, paletteName }: ShareColorFieldProps) {
   const t = colorTheme(color.hex)
   const style = {
-    '--hue': color.hex,
+    // panelBg, not color.hex: for saturated mid-tones this is the hue darkened
+    // just enough to carry white ink. The chip and the name below still print
+    // the true hex, so the value on screen is never the adjusted one.
+    '--hue': t.panelBg,
     '--ink': t.ink,
     '--ink-muted': t.inkMuted,
     '--chip-bg': t.chipBg,

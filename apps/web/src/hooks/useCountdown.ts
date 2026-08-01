@@ -12,8 +12,12 @@ import { useEffect, useRef, useState } from 'react'
  * only, so hydrated HTML matches the server byte-for-byte (spec S7); the mount
  * effect then recomputes from the absolute timestamp, silently correcting any
  * clock skew.
+ *
+ * A null `nextRotationAt` means "no rotation to count toward yet" — the hook
+ * holds the seed and never ticks. Home's fallback card uses this: it renders a
+ * placeholder on the server, then supplies a client-computed target on mount.
  */
-export function useCountdown(seedSeconds: number, nextRotationAt: string, onExpire: () => void): number {
+export function useCountdown(seedSeconds: number, nextRotationAt: string | null, onExpire: () => void): number {
   const [seconds, setSeconds] = useState(seedSeconds)
 
   // Held in a ref so a caller re-creating the callback doesn't restart the timer.
@@ -23,7 +27,9 @@ export function useCountdown(seedSeconds: number, nextRotationAt: string, onExpi
   }, [onExpire])
 
   useEffect(() => {
+    if (nextRotationAt === null) return
     const target = new Date(nextRotationAt).getTime()
+    if (Number.isNaN(target)) return
     const remaining = () => Math.max(0, Math.round((target - Date.now()) / 1000))
 
     let fired = false

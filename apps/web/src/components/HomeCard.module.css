@@ -1,0 +1,130 @@
+.card {
+  position: relative; /* lifts the card above the glow painted behind it */
+  display: flex;
+  flex-wrap: wrap;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+}
+
+.colorPanel {
+  flex: 1 1 220px;
+  min-height: 320px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+.colorTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* The one place the exact value is legible as text, so it is the accessibility
+   fallback for the hue itself — weighted to hold its own on a saturated panel. */
+.hexChip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 5px 9px;
+  border-radius: 16px;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.colorName {
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-top: 8px;
+  text-wrap: balance;
+}
+
+.detailPanel {
+  flex: 1 1 200px;
+  padding: 24px 22px;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.countdownBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.countdownLabel {
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+/* tabular-nums plus a monospace face means every digit occupies the same box:
+   the string cannot change width as it ticks, and the server's placeholder is
+   the same 8 glyphs, so hydration moves nothing either. */
+.countdown {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.rule {
+  height: 1px;
+  background: var(--hairline);
+}
+
+.paletteRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A label, not a heading — the color panel beside it is the headline. */
+.paletteName {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-right: 2px;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  /* An inset ring in the panel's own surface color, so a light swatch keeps an
+     edge without the row gaining a visible border. */
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+
+.rotates {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--text-faintest);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .colorPanel {
+    transition: none;
+  }
+}
