@@ -13,7 +13,9 @@ import {
   insertNeighborhood,
   updateNeighborhood,
 } from '../db/queries'
+import { cacheControlFor } from '../lib/cache'
 import { buildColor, type Color } from '../lib/color'
+import { ifNoneMatchSatisfied, weakEtag } from '../lib/etag'
 import { newAdminSecret, newNeighborhoodId } from '../lib/ids'
 import { pickColorIndex } from '../lib/pick'
 import { rotation } from '../lib/rotation'
@@ -76,24 +78,22 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
     if (!nb) return c.json({ error: 'neighborhood_not_found', message: 'Unknown neighborhood' }, 404)
 
     const { color, dayIndex, info, paletteSlug } = await todaysColor(db, nb)
-    const etag = `"${nb.id}-${dayIndex}"`
-    const cacheControl = `public, max-age=${info.secondsUntilRotation}`
-
-    if (c.req.header('If-None-Match') === etag) {
-      return c.body(null, 304, { ETag: etag, 'Cache-Control': cacheControl })
-    }
-
+    const cacheControl = cacheControlFor(info.secondsUntilRotation)
     const format = c.req.query('format')
-    if (format === 'hex') {
-      return c.text(color.hex, 200, { ETag: etag, 'Cache-Control': cacheControl })
-    }
-    if (format === 'rgb') {
-      return c.text(color.rgb.join(','), 200, { ETag: etag, 'Cache-Control': cacheControl })
+
+    // Each representation is validated by its own bytes, so `?format=hex` and
+    // the JSON body carry independent ETags — a name change moves the JSON
+    // validator and correctly leaves the hex one alone.
+    if (format === 'hex' || format === 'rgb') {
+      const body = format === 'hex' ? color.hex : color.rgb.join(',')
+      const etag = await weakEtag(body)
+      if (ifNoneMatchSatisfied(c.req.header('If-None-Match'), etag)) {
+        return c.body(null, 304, { ETag: etag, 'Cache-Control': cacheControl })
+      }
+      return c.text(body, 200, { ETag: etag, 'Cache-Control': cacheControl })
     }
 
-    c.header('ETag', etag)
-    c.header('Cache-Control', cacheControl)
-    return c.json({
+    const payload = {
       id: nb.id,
       name: nb.name,
       timezone: nb.timezone,
@@ -104,7 +104,27 @@ export const neighborhoodsRoute = new Hono<AppEnv>()
       seconds_until_rotation: info.secondsUntilRotation,
       palette: paletteSlug,
       day_index: dayIndex,
-    } satisfies PublicNeighborhood)
+    } satisfies PublicNeighborhood
+
+    // Hash the body we are about to send, so anything that can change it —
+    // palette, custom colors, name, timezone, rotation hour, the rotation
+    // itself — moves the validator.
+    //
+    // `seconds_until_rotation` is the one exclusion: it ticks every second, so
+    // hashing it would mint a new ETag per request and no conditional client
+    // would ever see a 304. That exclusion is exactly why this is a WEAK
+    // validator — two responses sharing an ETag are equivalent, not
+    // byte-identical. Clients that need a live countdown derive it from the
+    // absolute `next_rotation_at`, which IS covered here.
+    const etag = await weakEtag(JSON.stringify({ ...payload, seconds_until_rotation: 0 }))
+
+    if (ifNoneMatchSatisfied(c.req.header('If-None-Match'), etag)) {
+      return c.body(null, 304, { ETag: etag, 'Cache-Control': cacheControl })
+    }
+
+    c.header('ETag', etag)
+    c.header('Cache-Control', cacheControl)
+    return c.json(payload)
   })
   // Create
   .post('/', zJson(createSchema), async (c) => {

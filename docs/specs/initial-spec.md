@@ -222,10 +222,24 @@ GET /v1/neighborhoods/:id
 
 Response headers (important for HA + any CDN in front):
 ```
-Cache-Control: public, max-age=<seconds_until_rotation>
-ETag: "<neighborhood_id>-<day_index>"
+Cache-Control: public, max-age=60, stale-while-revalidate=60
+ETag: W/"<first 16 hex of SHA-256 over the response body>"
 ```
-Honor `If-None-Match` and return `304` when the ETag matches.
+Honor `If-None-Match` and return `304` when the ETag matches, comparing by the
+weak comparison function (RFC 9110 §13.1.2) so a list, a `*`, or a tag that lost
+its `W/` prefix still matches.
+
+The validator is derived from the body, so anything observable — the color, the
+palette, custom colors, the name, timezone, rotation hour, or the rotation
+itself — moves it. `seconds_until_rotation` is excluded (it ticks every second,
+and hashing it would mint a new ETag per request), which is what makes the
+validator weak.
+
+Freshness is capped at a minute, not held to the next rotation: the body is not
+a pure function of the clock, since an admin can PATCH the configuration at any
+moment, and a cache never revalidates a response that is still fresh. Both
+directives shrink near a rotation so `max-age + stale-while-revalidate` never
+reaches past it. Superseded details: [2026-08-01 decision record](../superpowers/specs/2026-08-01-read-cache-validators-design.md).
 
 `404 Not Found` if the id is unknown: `{ "error": "neighborhood_not_found" }`.
 
